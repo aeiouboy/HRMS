@@ -1,0 +1,36 @@
+# OS / editor
+.DS_Store
+*.swp
+*.swo
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Node (if ever added)
+node_modules/
+package-lock.json
+yarn.lock
+.pnpm-debug.log*
+
+# Build / cache
+dist/
+build/
+.cache/
+.parcel-cache/
+
+# OMC / tooling local state
+.omc/
+.claude/
+
+# Env / secrets (none currently, but guard against future)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# IDE
+.vscode/
+.idea/

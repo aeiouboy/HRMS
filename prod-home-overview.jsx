@@ -171,9 +171,13 @@ function HoFrame({ stepIdx, totalSteps, persona, title, narrative, mockup, callo
           const endX = ANNOT_X - 14;     // 14px before badge centre (badge -14 from card left)
           const endY = annotBadgeY(c.num);
           const dx = endX - startX;
-          // Bezier control points: pull out horizontally for a smooth S-curve.
-          const c1x = startX + Math.min(160, Math.max(60, dx * 0.55));
-          const c2x = endX - Math.min(160, Math.max(60, dx * 0.55));
+          // Bezier control points: extend horizontally for a smooth S-curve.
+          // Cap extension at dx/2.5 so c1x < c2x always — otherwise the curve
+          // loops back on itself when callouts sit close to the annotation
+          // column (e.g. right-side mockup callouts).
+          const ext = Math.max(30, Math.min(140, dx / 2.5));
+          const c1x = startX + ext;
+          const c2x = endX - ext;
           return (
             <g key={c.num}>
               {/* Subtle fill highlight inside the callout */}

@@ -50,6 +50,10 @@ const WALK = {
 
   // ── Layout (all frames share the same outer dimensions so they slot
   // uniformly into a horizontal storyboard row in DCSection) ────────
+  // FRAME_H is the *default*; individual frames can override via the
+  // `frameHeight` prop on <WalkFrame> when the mockup is taller (e.g.
+  // full Home page = ~1900). Spotlight pattern keeps annotations in
+  // the right column so callouts stay readable even on tall frames.
   FRAME_W:        1500,
   FRAME_H:        760,
   HEAD_H:         96,
@@ -82,11 +86,30 @@ function walkBadgeY(num) {
 //                   coords are in frame-space pixels (origin = frame top-left)
 //   annotations   — [{ num, title, body, color? }, ...]
 //                   length should match callouts; both ordered by num
-function WalkFrame({ stepIdx, totalSteps, persona, title, narrative, mockup, callouts = [], annotations = [] }) {
+function WalkFrame({
+  stepIdx, totalSteps, persona, title, narrative,
+  mockup, callouts = [], annotations = [],
+  // ── Spotlight retrofit props ─────────────────────────────────────
+  // dim       — when true, paint a translucent overlay everywhere
+  //             EXCEPT inside the callout rectangles. The page mockup
+  //             stays visible underneath; the audience sees full
+  //             context while the spotlight pulls attention to one
+  //             region. Pairs with the dashed callout outline on top.
+  // dimOpacity — 0..1 (default 0.25 = subtle, per plan §3 question 3)
+  // frameHeight — override the default 760 when the mockup needs the
+  //             whole production page in one frame (e.g. Home = 1900).
+  //             Annotation column re-flows from the top automatically.
+  dim         = false,
+  dimOpacity  = 0.25,
+  frameHeight,
+}) {
+  const FH = frameHeight || WALK.FRAME_H;
+  const maskId = `walk-spot-${stepIdx}-${callouts.length}-${FH}`;
+
   return (
     <div style={{
       width: WALK.FRAME_W,
-      height: WALK.FRAME_H,
+      height: FH,
       background: WALK.cream,
       fontFamily: WALK.font,
       color: WALK.ink,
@@ -159,9 +182,40 @@ function WalkFrame({ stepIdx, totalSteps, persona, title, narrative, mockup, cal
         ))}
       </div>
 
-      {/* ── Overlay: callout outlines + connector bezier lines ──── */}
-      <svg width={WALK.FRAME_W} height={WALK.FRAME_H}
+      {/* ── Overlay: dim mask + callout outlines + bezier connectors ─ */}
+      <svg width={WALK.FRAME_W} height={FH}
            style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+        {/* SVG mask: white = visible (dim painted), black = punch hole
+            (mockup shows through). Only mounted when dim is enabled so
+            the legacy non-dim modules keep their original look. */}
+        {dim && (
+          <defs>
+            <mask id={maskId} maskUnits="userSpaceOnUse">
+              <rect x="0" y="0" width={WALK.FRAME_W} height={FH} fill="white"/>
+              {callouts.map(c => (
+                <rect key={`hole-${c.num}`}
+                      x={c.x} y={c.y} width={c.w} height={c.h}
+                      rx={c.radius != null ? c.radius : 12}
+                      fill="black"/>
+              ))}
+            </mask>
+          </defs>
+        )}
+        {dim && (
+          // Cover only the mockup column so the header + annotations
+          // stay crisp. Anchored to MOCKUP_X / BODY_TOP and extended to
+          // the right edge of the mockup area (920px = 40 + 880).
+          <rect
+            x={WALK.MOCKUP_X - 8}
+            y={WALK.BODY_TOP - 8}
+            width={WALK.MOCKUP_W + 16}
+            height={FH - WALK.BODY_TOP + 8}
+            fill={WALK.ink}
+            fillOpacity={dimOpacity}
+            mask={`url(#${maskId})`}
+          />
+        )}
+
         {callouts.map(c => {
           const color = c.color || WALK.accent;
           const r = c.radius != null ? c.radius : 12;
@@ -178,8 +232,13 @@ function WalkFrame({ stepIdx, totalSteps, persona, title, narrative, mockup, cal
           const c2x = endX - ext;
           return (
             <g key={c.num}>
-              <rect x={c.x} y={c.y} width={c.w} height={c.h} rx={r}
-                    fill={color} opacity="0.07"/>
+              {/* Tint fill is skipped under dim mode (the spotlight
+                  already isolates the region); keep the dashed border
+                  and badge for both modes. */}
+              {!dim && (
+                <rect x={c.x} y={c.y} width={c.w} height={c.h} rx={r}
+                      fill={color} opacity="0.07"/>
+              )}
               <rect x={c.x} y={c.y} width={c.w} height={c.h} rx={r}
                     fill="none" stroke={color} strokeWidth="2"
                     strokeDasharray="6 5"/>

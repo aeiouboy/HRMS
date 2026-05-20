@@ -34,3 +34,7 @@ build/
 # IDE
 .vscode/
 .idea/
+
+# QA scaffolding (Playwright screenshots, vendor copies)
+_qa-frame.html
+_vendor/

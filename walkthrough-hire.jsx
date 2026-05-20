@@ -1,3 +1,4 @@
+(() => {
 // walkthrough-hire.jsx
 // Hire module Design Walkthrough (HR Admin persona · 3-step wizard).
 //
@@ -528,3 +529,5 @@ function HireWalk4() {
 
 // ── Expose to window ───────────────────────────────────────────────
 Object.assign(window, { HireWalk1, HireWalk2, HireWalk3, HireWalk4 });
+
+})();

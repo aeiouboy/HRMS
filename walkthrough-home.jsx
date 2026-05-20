@@ -1,3 +1,4 @@
+(() => {
 // walkthrough-home.jsx
 // Home module Design Walkthrough (Manager persona).
 //
@@ -514,3 +515,5 @@ function HomeWalk4() {
 
 // ── Expose to window ───────────────────────────────────────────────
 Object.assign(window, { HomeWalk1, HomeWalk2, HomeWalk3, HomeWalk4 });
+
+})();

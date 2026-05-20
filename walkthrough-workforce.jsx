@@ -1,3 +1,4 @@
+(() => {
 // walkthrough-workforce.jsx
 // Workforce module Design Walkthrough (Manager + HR Admin personas).
 //
@@ -680,3 +681,5 @@ function WorkforceWalk4() {
 
 // ── Expose to window ───────────────────────────────────────────────
 Object.assign(window, { WorkforceWalk1, WorkforceWalk2, WorkforceWalk3, WorkforceWalk4 });
+
+})();

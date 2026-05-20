@@ -1,3 +1,4 @@
+(() => {
 // walkthrough-employee.jsx
 // Employee module Design Walkthrough — Option C: 3 persona sub-sections.
 //
@@ -577,6 +578,7 @@ const ADMIN_COMMON = {
   frameHeight: ADMIN_FRAME_H,
 };
 
+
 // ═══════════════════════════════════════════════════════════════════
 // Sub-section SELF — Frame 1
 // Spotlight: hero identity card
@@ -777,3 +779,5 @@ Object.assign(window, {
   EmployeeWalkAdmin1,
   EmployeeWalkAdmin2,
 });
+
+})();

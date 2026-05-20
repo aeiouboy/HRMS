@@ -1,3 +1,4 @@
+(() => {
 // walkthrough-lifecycle.jsx
 // Lifecycle module Design Walkthrough (Transfer + Onboarding + Confirmation).
 //
@@ -784,3 +785,5 @@ function LifecycleWalk4() {
 
 // ── Expose to window ───────────────────────────────────────────────
 Object.assign(window, { LifecycleWalk1, LifecycleWalk2, LifecycleWalk3, LifecycleWalk4 });
+
+})();

@@ -1,3 +1,4 @@
+(() => {
 // walkthrough-payroll.jsx
 // Payroll module Design Walkthrough — Option C: 5 persona sub-sections.
 //
@@ -1069,3 +1070,5 @@ Object.assign(window, {
   PayrollWalkHris1,
   PayrollWalkSpd1,
 });
+
+})();

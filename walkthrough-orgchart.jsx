@@ -1,3 +1,4 @@
+(() => {
 // walkthrough-orgchart.jsx
 // OrgChart module Design Walkthrough (Employee → Manager → HR arc).
 //
@@ -507,3 +508,5 @@ function OrgChartWalk4() {
 
 // ── Expose to window ───────────────────────────────────────────────
 Object.assign(window, { OrgChartWalk1, OrgChartWalk2, OrgChartWalk3, OrgChartWalk4 });
+
+})();

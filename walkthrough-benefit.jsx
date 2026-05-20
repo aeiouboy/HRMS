@@ -1,3 +1,4 @@
+(() => {
 // walkthrough-benefit.jsx
 // Benefit module Design Walkthrough — Option C: 4 persona sub-sections.
 //
@@ -890,3 +891,5 @@ Object.assign(window, {
   BenefitWalkAdmin2,
   BenefitWalkHris1,
 });
+
+})();

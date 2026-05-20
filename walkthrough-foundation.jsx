@@ -1,3 +1,4 @@
+(() => {
 // walkthrough-foundation.jsx
 // Foundation walkthrough — explains the Humi shell PRIMITIVES that every
 // module reuses (sidebar, nav grouping, identity surfaces, persona
@@ -379,3 +380,5 @@ Object.assign(window, {
   FoundationWalk1, FoundationWalk2, FoundationWalk3,
   FoundationWalk4, FoundationWalk5,
 });
+
+})();

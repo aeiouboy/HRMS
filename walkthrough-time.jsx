@@ -1,3 +1,4 @@
+(() => {
 // walkthrough-time.jsx
 // Time Management module Design Walkthrough — Option C: 5 persona sub-sections.
 //
@@ -1093,3 +1094,5 @@ Object.assign(window, {
   TimeWalkHris1,
   TimeWalkSpd1,
 });
+
+})();

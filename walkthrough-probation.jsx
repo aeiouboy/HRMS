@@ -1,3 +1,4 @@
+(() => {
 // walkthrough-probation.jsx
 // Probation module Design Walkthrough (Manager + HR Admin personas).
 //
@@ -571,3 +572,5 @@ function ProbationWalk4() {
 
 // ── Expose to window ───────────────────────────────────────────────
 Object.assign(window, { ProbationWalk1, ProbationWalk2, ProbationWalk3, ProbationWalk4 });
+
+})();

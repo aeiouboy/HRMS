@@ -1,3 +1,4 @@
+(() => {
 // walkthrough-offboard.jsx
 // Offboard module Design Walkthrough (Manager + HR Admin personas).
 //
@@ -706,3 +707,5 @@ function OffboardWalk4() {
 
 // ── Expose to window ───────────────────────────────────────────────
 Object.assign(window, { OffboardWalk1, OffboardWalk2, OffboardWalk3, OffboardWalk4 });
+
+})();

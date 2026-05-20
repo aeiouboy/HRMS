@@ -223,13 +223,54 @@ function WalkFrame({
           const startY = c.y + c.h / 2;
           const endX = WALK.ANNOT_X - 14;
           const endY = walkBadgeY(c.num);
-          const dx = endX - startX;
-          // Cap extension at dx/2.5 so c1x < c2x — keeps the bezier
-          // smooth for both wide (left-column) and narrow (right-
-          // column) connectors. See PR #2.
-          const ext = Math.max(30, Math.min(140, dx / 2.5));
-          const c1x = startX + ext;
-          const c2x = endX - ext;
+
+          // ── Connector routing (text-overlap avoidance) ────────────
+          // For NARROW callouts (sidebars, rails) a straight bezier
+          // from the right edge would slice horizontally across rows
+          // of body copy in the mockup. Instead we route a Manhattan
+          // U-shape that hugs the empty 24-px gap between the header
+          // strip and the mockup top — the line exits the callout
+          // UP from just below its top edge, runs RIGHT across the
+          // gap above the mockup, then comes DOWN in the column gap
+          // beside the annotation card. The vertical exit stays at
+          // the callout's right edge (typically card padding or the
+          // mockup boundary, both text-free).
+          //
+          // For WIDE callouts that already reach the mockup right
+          // edge (e.g. full-row spotlights in Home), the short bezier
+          // through the column gap stays in empty space — keep that
+          // path.
+          const mockupRight = WALK.MOCKUP_X + WALK.MOCKUP_W;  // 920
+          const topY        = WALK.BODY_TOP - 12;             // 108: in header-mockup gap
+          const useTopRoute = (mockupRight - startX) > 60;
+
+          // Vertical exit anchor — drop just below any top-edge badge
+          // so the connector visually emerges from the callout body
+          // rather than the badge itself.
+          const exitY = c.y + 16;
+
+          let path;
+          if (useTopRoute) {
+            // Manhattan U with small rounded corners (quadratic joins)
+            const r1 = 8;
+            path =
+              `M ${startX} ${exitY}` +
+              ` L ${startX} ${topY + r1}` +
+              ` Q ${startX} ${topY}  ${startX + r1} ${topY}` +
+              ` L ${endX - r1} ${topY}` +
+              ` Q ${endX} ${topY}  ${endX} ${topY + r1}` +
+              ` L ${endX} ${endY}`;
+          } else {
+            const ext = Math.max(30, Math.min(140, (endX - startX) / 2.5));
+            path = `M ${startX} ${startY} C ${startX + ext} ${startY} ${endX - ext} ${endY} ${endX} ${endY}`;
+          }
+
+          // Start dot anchored to the callout (right edge midline for
+          // wide callouts; just below top-right corner for narrow ones
+          // routed via TOP).
+          const startDotX = useTopRoute ? startX : startX;
+          const startDotY = useTopRoute ? exitY  : startY;
+
           return (
             <g key={c.num}>
               {/* Tint fill is skipped under dim mode (the spotlight
@@ -246,10 +287,17 @@ function WalkFrame({
               <text x={c.x} y={c.y + 4.5} textAnchor="middle"
                     fontSize="13" fontWeight="700" fill="#fff"
                     fontFamily="ui-sans-serif, system-ui">{c.num}</text>
-              <path d={`M ${startX} ${startY} C ${c1x} ${startY} ${c2x} ${endY} ${endX} ${endY}`}
-                    stroke={color} strokeWidth="1.6" fill="none"
-                    strokeDasharray="5 4" opacity="0.85"/>
-              <circle cx={startX} cy={startY} r={3.5} fill={color}/>
+              {/* Cream halo first — masks text behind the line strip
+                  so the dashed connector stays sharp without overlap. */}
+              <path d={path}
+                    stroke={WALK.cream} strokeWidth="5" fill="none"
+                    strokeLinecap="round" opacity="0.85"/>
+              {/* Dashed connector on top — subtle 0.55 opacity, thinner
+                  stroke so it whispers rather than shouts. */}
+              <path d={path}
+                    stroke={color} strokeWidth="1.3" fill="none"
+                    strokeDasharray="5 4" opacity="0.55"/>
+              <circle cx={startDotX} cy={startDotY} r={3.5} fill={color}/>
               <circle cx={endX} cy={endY} r={3.5} fill={color}/>
             </g>
           );

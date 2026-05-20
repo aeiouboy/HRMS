@@ -104,13 +104,25 @@ function App() {
               { name: 'HomeWalk4', label: 'เชื่อมสัมพันธ์ · Announcements + Birthday',  h: 1380 },
             ]}/>
 
-      <Sect id="walk-employee" emoji="👥" title="Employee · ทะเบียนพนักงาน"
-            persona="Employee · Manager · HR Admin"
+      <Sect id="walk-employee-self" emoji="👥" title="Employee · Self-service"
+            persona="Employee"
             comps={[
-              { name: 'EmployeeWalk1', label: 'Self-service · พนักงานดูข้อมูลตัวเอง' },
-              { name: 'EmployeeWalk2', label: 'Manager team view · ทีม 14 คน' },
-              { name: 'EmployeeWalk3', label: 'Admin registry · 2,847 คน' },
-              { name: 'EmployeeWalk4', label: 'Detail hub · timeline + 9 actions' },
+              { name: 'EmployeeWalkSelf1', label: 'Hero identity · ตัวตนในระบบ + tab map',  h: 780 },
+              { name: 'EmployeeWalkSelf2', label: 'Task card + ข้อมูล · urgency + PDPA',     h: 780 },
+            ]}/>
+
+      <Sect id="walk-employee-manager" emoji="👥" title="Employee · Manager view"
+            persona="Manager"
+            comps={[
+              { name: 'EmployeeWalkManager1', label: 'Team pulse · 4 stat cards',              h: 640 },
+              { name: 'EmployeeWalkManager2', label: 'Team table · drill to individual',       h: 640 },
+            ]}/>
+
+      <Sect id="walk-employee-admin" emoji="👥" title="Employee · Admin registry"
+            persona="HR Admin"
+            comps={[
+              { name: 'EmployeeWalkAdmin1', label: 'Registry · filter 2,847 คน',              h: 820 },
+              { name: 'EmployeeWalkAdmin2', label: 'Detail hub · timeline + 9 actions',        h: 820 },
             ]}/>
 
       <Sect id="walk-hire" emoji="🆕" title="Hire · บันทึกพนักงานใหม่"

@@ -235,13 +235,35 @@ function App() {
               { name: 'BenefitWalkHris1', label: 'Master catalog · 5 plans + eligibility + auto-approve', h: 460 },
             ]}/>
 
-      <Sect id="walk-time" emoji="⏱" title="Time · ลงเวลา + ลา"
-            persona="Employee · Manager · HR Admin · HRIS · SPD"
+      <Sect id="walk-time-emp" emoji="⏱" title="Time · Employee · ลงเวลา + วันลา"
+            persona="Employee · คุณปรีชา"
             comps={[
-              { name: 'TimeWalk1', label: 'Employee clock-in · GPS + timesheet 7-day' },
-              { name: 'TimeWalk2', label: 'Manager team calendar · 7-day Gantt' },
-              { name: 'TimeWalk3', label: 'Admin dashboard · KPIs + heatmap' },
-              { name: 'TimeWalk4', label: 'HRIS + SPD · catalog + amendment queue' },
+              { name: 'TimeWalkEmp1', label: 'ลงเวลา · นาฬิกาใหญ่ + GPS + biometric fallback', h: 620 },
+              { name: 'TimeWalkEmp2', label: 'Timesheet 7 วัน · สีบอก status',                 h: 620 },
+            ]}/>
+
+      <Sect id="walk-time-manager" emoji="⏱" title="Time · Manager · ดูทีม + อนุมัติ"
+            persona="Manager · คุณอาทิตย์"
+            comps={[
+              { name: 'TimeWalkManager1', label: 'Gantt 7 วัน + approval inbox inline', h: 420 },
+            ]}/>
+
+      <Sect id="walk-time-admin" emoji="⏱" title="Time · HR Admin · ภาพรวมองค์กร"
+            persona="HR Admin · คุณจอร์แดน"
+            comps={[
+              { name: 'TimeWalkAdmin1', label: 'KPI row + heatmap สาขา × ชั่วโมง + anomaly list', h: 440 },
+            ]}/>
+
+      <Sect id="walk-time-hris" emoji="⏱" title="Time · HRIS · ตั้งค่ากะ + policy"
+            persona="HRIS · คุณจอร์แดน"
+            comps={[
+              { name: 'TimeWalkHris1', label: 'Shift catalog + OT/leave policy', h: 320 },
+            ]}/>
+
+      <Sect id="walk-time-spd" emoji="⏱" title="Time · SPD · แก้เวลา + cross-check"
+            persona="SPD · คุณพิม"
+            comps={[
+              { name: 'TimeWalkSpd1', label: 'Amendment queue + system log vs request + หลักฐาน', h: 360 },
             ]}/>
 
     </DesignCanvas>

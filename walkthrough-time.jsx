@@ -1,23 +1,32 @@
 // walkthrough-time.jsx
-// Time Management module Design Walkthrough — 5 personas across 4 frames.
-// 4 frames follow the time-management lifecycle:
-//   01 ลงเวลา      — Employee · clock-in card + 7-day timesheet + leave balance
-//   02 ดูทีม       — Manager  · 7-day team Gantt + shift codes + approval inbox
-//   03 ภาพรวม      — HR Admin · 2,847-EE KPI row + branch × hour heatmap + anomaly list
-//   04 ตั้งค่า/แก้ไข — HRIS + SPD · shift catalog + OT/leave policy + amendment cross-check
+// Time Management module Design Walkthrough — Option C: 5 persona sub-sections.
 //
-// Each mockup is an inline-style replica of mod-time-1/2/3.jsx so this
-// overview is robust against changes in the live mockup files.
+// RETROFIT PATTERN (static page + rotating spotlight per sub-section):
+//   empPageMockup()     — Employee clock-in + 7-day timesheet + leave balance
+//   managerPageMockup() — Manager 7-day Gantt + approval inbox
+//   adminPageMockup()   — HR Admin KPI row + branch heatmap + anomaly list
+//   hrisPageMockup()    — HRIS shift catalog + OT/leave policy
+//   spdPageMockup()     — SPD amendment queue + active case cross-check
+//
+// Sub-sections:
+//   Employee (2 frames) · TimeWalkEmp1, TimeWalkEmp2
+//   Manager  (1 frame)  · TimeWalkManager1
+//   Admin    (1 frame)  · TimeWalkAdmin1
+//   HRIS     (1 frame)  · TimeWalkHris1
+//   SPD      (1 frame)  · TimeWalkSpd1
 //
 // Time is always 24-hour (08:00, 18:00, 22:00); OT cost uses ฿ symbol.
 
 const { WALK, WalkFrame, WalkAvatar, WalkTag, walkStyles } = window;
 
-// ═══════════════════════════════════════════════════════════════════
-// Frame 1 · ลงเวลา — Employee clock-in + timesheet + leave balance
-// ═══════════════════════════════════════════════════════════════════
-function TimeWalk1() {
-  // 7-day timesheet rows (most recent first)
+const SPOTX = WALK.MOCKUP_X - 4;
+const SPOTW = WALK.MOCKUP_W + 8;
+
+// ══════════════════════════════════════════════════════════════════════
+// PERSONA A — Employee page mockup
+// Clock-in card + leave balance + 7-day timesheet
+// ══════════════════════════════════════════════════════════════════════
+function empPageMockup() {
   const days = [
     { d: 'อ. 27',  k: '09:00–18:00',  in: '09:02',  brk: '12:00–13:00',  out: '—',     ot: '—',       tot: 'กำลังทำ', active: true },
     { d: 'จ. 26',  k: '09:00–18:00',  in: '08:58',  brk: '12:05–13:00',  out: '19:14', ot: '+1.2 ชม.', tot: '10.2 ชม.' },
@@ -27,7 +36,6 @@ function TimeWalk1() {
     { d: 'พฤ 22',  k: 'ลาพักร้อน',    in: '—',      brk: '—',            out: '—',     ot: '—',       tot: 'ลา 1 วัน', leave: true },
   ];
 
-  // Leave balance buckets
   const leaves = [
     { l: 'ลาพักร้อน',     used: 4,   total: 12, c: WALK.accent },
     { l: 'ลาป่วย',        used: 2,   total: 30, c: WALK.warning },
@@ -35,11 +43,11 @@ function TimeWalk1() {
     { l: 'ลาพักผ่อนสะสม', used: 0,   total: 3,  c: WALK.sage },
   ];
 
-  const mockup = (
+  return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {/* ── Top row: clock-in card + leave balance grid ─────────── */}
+      {/* Top row: clock-in card + leave balance grid */}
       <div style={{ display: 'grid', gap: 14, gridTemplateColumns: '1.1fr 1fr' }}>
-        {/* Clock-in card with big clock + GPS chip + action row */}
+        {/* Clock-in card */}
         <div style={{ ...walkStyles.card(false), padding: '16px 18px', minHeight: 230, overflow: 'hidden' }}>
           <div style={{
             position: 'absolute', width: 130, height: 160, right: -40, top: -50,
@@ -62,7 +70,6 @@ function TimeWalk1() {
             <div style={{ fontSize: 14, color: WALK.inkMuted }}>:18</div>
           </div>
 
-          {/* Status chips: in-status + GPS confirmation */}
           <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
             <span style={{
               background: WALK.accentSoft, color: WALK.accent,
@@ -81,7 +88,6 @@ function TimeWalk1() {
             }}>📍 CTW Floor 1 · GPS ตรงพิกัด</span>
           </div>
 
-          {/* Primary action + QR + fingerprint */}
           <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
             <button style={{ ...walkStyles.btnPrimary, flex: 1, padding: '10px 14px', fontSize: 13 }}>
               ⏏ ลงเวลาออกงาน
@@ -90,7 +96,6 @@ function TimeWalk1() {
             <button style={{ ...walkStyles.btnGhost, width: 38, padding: 0, justifyContent: 'center' }}>☌</button>
           </div>
 
-          {/* Today's time stamps */}
           <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
             {[
               ['เข้างาน',   '09:02',       WALK.accent],
@@ -152,7 +157,7 @@ function TimeWalk1() {
         </div>
       </div>
 
-      {/* ── Bottom: 7-day timesheet table ───────────────────────── */}
+      {/* 7-day timesheet table */}
       <div style={{ ...walkStyles.card(false), padding: 0, overflow: 'hidden' }}>
         <div style={{
           padding: '12px 16px', borderBottom: `1px solid ${WALK.hairlineSoft}`,
@@ -175,7 +180,6 @@ function TimeWalk1() {
           ))}
         </div>
 
-        {/* Column header */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: '70px 1fr 70px 100px 70px 70px 70px',
@@ -184,16 +188,11 @@ function TimeWalk1() {
           fontSize: 10, fontWeight: 700, color: WALK.inkMuted,
           letterSpacing: '.06em', textTransform: 'uppercase',
         }}>
-          <div>วันที่</div>
-          <div>กะ</div>
-          <div>เข้า</div>
-          <div>พัก</div>
-          <div>ออก</div>
-          <div>OT</div>
+          <div>วันที่</div><div>กะ</div><div>เข้า</div>
+          <div>พัก</div><div>ออก</div><div>OT</div>
           <div style={{ textAlign: 'right' }}>รวม</div>
         </div>
 
-        {/* Rows */}
         {days.map((d, i) => (
           <div key={i} style={{
             display: 'grid',
@@ -221,39 +220,29 @@ function TimeWalk1() {
       </div>
     </div>
   );
-
-  return (
-    <WalkFrame
-      stepIdx={1} totalSteps={4}
-      persona="Employee · คุณปรีชา"
-      title="ลงเวลา · GPS ยืนยัน ลาเห็นยอด ปฏิทินอ่านรวด"
-      narrative="พนักงานเปิด Time ตอนเช้าหลัก ๆ เพื่อตอบ 3 คำถาม: 'ลงเวลาแล้วหรือยัง / วันลาเหลือเท่าไร / สัปดาห์นี้ทำไปกี่ชม.' จัด layout ให้ครอบทั้ง 3 ใน scroll เดียว — clock-in ใหญ่ด้านบน, leave balance ขวา, timesheet 7 วันด้านล่าง"
-      mockup={mockup}
-      callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 6,   y: WALK.BODY_TOP + 6,   w: 470, h: 110 },
-        { num: 2, x: WALK.MOCKUP_X + 16,  y: WALK.BODY_TOP + 102, w: 200, h: 28, radius: 14 },
-        { num: 3, x: WALK.MOCKUP_X + 488, y: WALK.BODY_TOP + 6,   w: 380, h: 230 },
-        { num: 4, x: WALK.MOCKUP_X + 6,   y: WALK.BODY_TOP + 252, w: 862, h: 286 },
-      ]}
-      annotations={[
-        { num: 1, title: 'นาฬิกาใหญ่ + GPS ยืนยันพิกัด',
-          body: 'เวลาปัจจุบัน 14:32 ฟอนต์ display 46px อ่านได้แวบเดียว; chip เขียว "เข้างานแล้ว 09:02" + chip "CTW Floor 1 · GPS ตรงพิกัด" ลดข้อสงสัยว่าระบบบันทึกถูกหรือไม่' },
-        { num: 2, title: 'Primary action + biometric fallback',
-          body: 'ปุ่ม "ลงเวลาออกงาน" teal solid เป็น default path — biometric (QR/fingerprint) เป็น 38px chip ข้างๆ เพราะ sensor พลาดได้ (มือเปียก/แสงน้อย) ปุ่ม manual เป็น safety net ให้ไม่มีพนักงานติดที่ door เพราะอ่าน lay ไม่ติด' },
-        { num: 3, title: 'Leave balance · 4 ประเภท · progress bar',
-          body: 'พักร้อน/ป่วย/กิจ/สะสม แต่ละก้อนใช้สีคนละ token (teal/warning/indigo/sage) + แท่ง progress ใช้แทนตัวเลขล้วน ทำให้ scan ได้ว่า "เหลือเยอะหรือใกล้หมด" ใน 1 วินาที' },
-        { num: 4, title: 'Timesheet 7 วัน · highlight วันนี้',
-          body: 'แถววันนี้ background teal-soft + tag "กำลังทำ"; วันที่มาสายขึ้นสีส้ม +8 นาที, OT เป็น teal accent — ใช้สีบอก status แทน column "สถานะ" แยก ลด noise' },
-      ]}
-    />
-  );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Frame 2 · ดูทีม — Manager 7-day Gantt + approval inbox
-// ═══════════════════════════════════════════════════════════════════
-function TimeWalk2() {
-  // 7-day Gantt rows: M = morning shift teal, E = evening shift butter
+// Y-offsets for employee page (frame-space)
+const EMP = {
+  clockCard:  { y: WALK.BODY_TOP,       h: 260 },
+  leaveGrid:  { y: WALK.BODY_TOP,       h: 260 },
+  clockBtn:   { y: WALK.BODY_TOP + 148, h: 46  },
+  timesheet:  { y: WALK.BODY_TOP + 284, h: 310 },
+  todayRow:   { y: WALK.BODY_TOP + 358, h: 46  },
+};
+
+const EMP_FRAME_H = 620;
+const EMP_COMMON = {
+  totalSteps: 2,
+  persona: 'Employee · คุณปรีชา',
+  frameHeight: EMP_FRAME_H,
+};
+
+// ══════════════════════════════════════════════════════════════════════
+// PERSONA B — Manager page mockup
+// 7-day Gantt + approval inbox
+// ══════════════════════════════════════════════════════════════════════
+function managerPageMockup() {
   const team = [
     { n: 'มาริสา ส.',   r: 'Cashier',        c: WALK.accent,
       days: [{t:'M'}, {t:'M', act:true}, {t:'M'}, {t:'M'}, {t:'E'}, {t:'off'}, {t:'off'}] },
@@ -276,7 +265,7 @@ function TimeWalk2() {
     { t: 'ลาป่วย ย้อนหลัง',  n: 'กัลยา ภ.',  d: '27 พ.ค. (1 วัน)',     r: '+ ใบรับรองแพทย์',   c: WALK.warning },
   ];
 
-  const mockup = (
+  return (
     <div style={{ display: 'grid', gap: 14, gridTemplateColumns: '1.4fr 1fr' }}>
       {/* Team Gantt card */}
       <div style={{ ...walkStyles.card(false), padding: 0, overflow: 'hidden' }}>
@@ -371,7 +360,7 @@ function TimeWalk2() {
           </div>
         ))}
 
-        {/* Shift code legend */}
+        {/* Shift legend */}
         <div style={{
           padding: '10px 16px', background: WALK.creamSoft, display: 'flex', gap: 14, flexWrap: 'wrap',
           fontSize: 10.5, color: WALK.inkMuted, borderTop: `1px solid ${WALK.hairlineSoft}`,
@@ -391,7 +380,7 @@ function TimeWalk2() {
         </div>
       </div>
 
-      {/* Approval inbox card */}
+      {/* Approval inbox */}
       <div style={{ ...walkStyles.card(false), padding: 0, overflow: 'hidden' }}>
         <div style={{
           padding: '12px 16px', borderBottom: `1px solid ${WALK.hairlineSoft}`,
@@ -435,39 +424,30 @@ function TimeWalk2() {
       </div>
     </div>
   );
-
-  return (
-    <WalkFrame
-      stepIdx={2} totalSteps={4}
-      persona="Manager · คุณอาทิตย์"
-      title="ดูทีม · Gantt 7 วัน อนุมัติแบบ inline"
-      narrative="Manager หน้าร้าน 14 คนต้องการเห็น 'กะของใครวันไหน' ในจอเดียว — Gantt 7 วัน × พนักงาน บล็อกสี M/E ทำให้ scan ปัญหากำลังพล (ป่วย/พักร้อน/OT) ได้แวบเดียว; inbox ขวาให้ approve โดยไม่ต้องเปลี่ยนหน้า"
-      mockup={mockup}
-      callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 6,   y: WALK.BODY_TOP + 70,  w: 500, h: 230 },
-        { num: 2, x: WALK.MOCKUP_X + 6,   y: WALK.BODY_TOP + 308, w: 500, h: 36 },
-        { num: 3, x: WALK.MOCKUP_X + 524, y: WALK.BODY_TOP + 6,   w: 344, h: 60 },
-        { num: 4, x: WALK.MOCKUP_X + 562, y: WALK.BODY_TOP + 226, w: 220, h: 36, radius: 8 },
-      ]}
-      annotations={[
-        { num: 1, title: '7-day Gantt · บล็อกสี M/E',
-          body: 'แถวพนักงาน × คอลัมน์วัน · บล็อก "M 09–18" teal-soft / "E 14–22" butter-soft / "ป่วย" warning / "พักร้อน" indigo — ใช้สี token เดียวกับ status แทน text-only ให้อ่านได้เป็น pattern' },
-        { num: 2, title: 'Legend อยู่ติดตาราง',
-          body: 'อธิบายรหัสกะที่ใช้ในตาราง (M/E + ป่วย + พักร้อน) วางใน footer bar cream — ไม่บังตาราง แต่ก็ไม่ต้องหา; ลด onboarding cost สำหรับผู้จัดการใหม่' },
-        { num: 3, title: 'Header tag · 3 ประเภทคำขอ',
-          body: 'Inbox จัดกลุ่ม OT/ลา/ลาย้อนหลัง โดย icon + บล็อกสี (butter/indigo/warning) สื่อ urgency ต่างกัน · SLA 24 ชม. coral tag เตือนว่าต้องตัดสินใจในวัน' },
-        { num: 4, title: 'Approve/Reject inline',
-          body: 'ปุ่ม approve teal + ปฏิเสธ ghost อยู่ในแถวเดียวกัน ไม่ต้องเข้า detail page — เหตุผลการขอแสดงเป็น quote italic เพื่อ humanise (ครอบครัวมาเที่ยว) ก่อนตัดสินใจ' },
-      ]}
-    />
-  );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Frame 3 · ภาพรวม — HR Admin 2,847-EE dashboard + heatmap
-// ═══════════════════════════════════════════════════════════════════
-function TimeWalk3() {
-  // KPI cards · 5 metrics
+// Y-offsets for manager page (frame-space)
+const MGR = {
+  gantt:    { y: WALK.BODY_TOP,       h: 360 },
+  ganttRow: { y: WALK.BODY_TOP + 76,  h: 280 },
+  legend:   { y: WALK.BODY_TOP + 342, h: 40  },
+  inbox:    { y: WALK.BODY_TOP,       h: 360 },
+  inboxSLA: { y: WALK.BODY_TOP,       h: 60  },
+  approve:  { y: WALK.BODY_TOP + 290, h: 70  },
+};
+
+const MGR_FRAME_H = 420;
+const MGR_COMMON = {
+  totalSteps: 1,
+  persona: 'Manager · คุณอาทิตย์',
+  frameHeight: MGR_FRAME_H,
+};
+
+// ══════════════════════════════════════════════════════════════════════
+// PERSONA C — HR Admin page mockup
+// KPI row + heatmap + anomaly list
+// ══════════════════════════════════════════════════════════════════════
+function adminPageMockup() {
   const kpis = [
     { l: 'ลงเวลาวันนี้', v: '2,418', s: '85% ของกำลังพล',     accent: WALK.accent },
     { l: 'ลา / ขาด',     v: '237',   s: 'ป่วย 142 · กิจ 95' },
@@ -476,7 +456,6 @@ function TimeWalk3() {
     { l: 'เคสต้องดู',     v: '62',    s: 'แก้เวลา 38 · ขาดเอกสาร 24', accent: WALK.coral },
   ];
 
-  // Heatmap: branches × hours, values = % attendance, warm palette only
   const branches = [
     { n: 'CTW',      v: [10,98,99,99,90,99,99,99,99,99,94,82] },
     { n: 'Chidlom',  v: [ 8,95,98,99,88,98,99,99,99,98,90,72] },
@@ -487,14 +466,12 @@ function TimeWalk3() {
   ];
   const hours = [8,9,10,11,12,13,14,15,16,17,18,19];
 
-  // Tint a cell based on % attendance — warm palette only (teal scale, not red/green)
   const heatColor = v => v < 30 ? WALK.hairlineSoft
                        : v < 60 ? 'rgba(31,168,160,0.18)'
                        : v < 80 ? 'rgba(31,168,160,0.42)'
                        : v < 95 ? 'rgba(31,168,160,0.72)'
                        :          WALK.accent;
 
-  // Anomalies — sorted by urgency
   const anomalies = [
     { c: WALK.danger,  t: 'นาฬิกาเครื่อง CTW Floor 3 ไม่ส่งข้อมูล', s: '38 คนยังไม่บันทึก · ตั้งแต่ 09:00', a: 'แก้ไข' },
     { c: WALK.warning, t: 'Embassy · ขาดงาน 8 คน (ปกติ ~3)',       s: 'ตรวจกะหรือเหตุการณ์',              a: 'ดู' },
@@ -503,9 +480,9 @@ function TimeWalk3() {
     { c: WALK.danger,  t: '3 คน เข้างาน > 50 ชม./สัปดาห์',          s: 'ฝ่าฝืน กม.แรงงาน',                  a: 'แจ้ง' },
   ];
 
-  const mockup = (
+  return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {/* KPI row · 5 cards */}
+      {/* KPI row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
         {kpis.map(k => (
           <div key={k.l} style={{
@@ -527,7 +504,6 @@ function TimeWalk3() {
 
       {/* Heatmap + anomaly list */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 12 }}>
-        {/* Heatmap */}
         <div style={{ ...walkStyles.card(false), padding: '14px 16px' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 10 }}>
             <div>
@@ -547,7 +523,6 @@ function TimeWalk3() {
             ))}
           </div>
 
-          {/* Heatmap grid: branch row × hour col */}
           <div style={{ display: 'grid', gridTemplateColumns: '70px repeat(12, 1fr)', gap: 2 }}>
             <div/>
             {hours.map(h => (
@@ -577,7 +552,6 @@ function TimeWalk3() {
             ))}
           </div>
 
-          {/* Legend · warm palette scale */}
           <div style={{
             display: 'flex', gap: 10, marginTop: 12, alignItems: 'center',
             fontSize: 10, color: WALK.inkMuted, flexWrap: 'wrap',
@@ -596,7 +570,6 @@ function TimeWalk3() {
           </div>
         </div>
 
-        {/* Anomaly list */}
         <div style={{ ...walkStyles.card(false), padding: 0, overflow: 'hidden' }}>
           <div style={{ padding: '12px 14px', borderBottom: `1px solid ${WALK.hairlineSoft}` }}>
             <div style={walkStyles.eyebrow}>ความผิดปกติ · วันนี้</div>
@@ -620,48 +593,35 @@ function TimeWalk3() {
                 <div style={{ fontSize: 11.5, fontWeight: 600, lineHeight: 1.3 }}>{a.t}</div>
                 <div style={{ fontSize: 10, color: WALK.inkMuted, marginTop: 2 }}>{a.s}</div>
               </div>
-              <button style={{
-                ...walkStyles.btnGhost, padding: '3px 9px', fontSize: 10.5,
-              }}>{a.a}</button>
+              <button style={{ ...walkStyles.btnGhost, padding: '3px 9px', fontSize: 10.5 }}>{a.a}</button>
             </div>
           ))}
         </div>
       </div>
     </div>
   );
-
-  return (
-    <WalkFrame
-      stepIdx={3} totalSteps={4}
-      persona="HR Admin · คุณจอร์แดน"
-      title="ภาพรวม · 2,847 EE × 38 สาขา ใน 3 ก้อน"
-      narrative="HR Admin บริหาร 2,847 คน ใน 38 สาขา ไม่สามารถ scan รายคน — จัด 3 ก้อน: KPI row บนสุด (5 ตัวเลขสรุป), heatmap สาขา × ชั่วโมงให้เห็น pattern เชิงพื้นที่/เวลา, anomaly list ขวาเป็น actionable surfaces เรียงตามความเร่งด่วน"
-      mockup={mockup}
-      callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 6,   y: WALK.BODY_TOP + 6,   w: 862, h: 78 },
-        { num: 2, x: WALK.MOCKUP_X + 6,   y: WALK.BODY_TOP + 102, w: 514, h: 280 },
-        { num: 3, x: WALK.MOCKUP_X + 6,   y: WALK.BODY_TOP + 338, w: 514, h: 36 },
-        { num: 4, x: WALK.MOCKUP_X + 532, y: WALK.BODY_TOP + 102, w: 336, h: 320 },
-      ]}
-      annotations={[
-        { num: 1, title: 'KPI row · 5 ตัวเลขเดียวจบ',
-          body: 'ลงเวลา/ลา/มาสาย/OT/เคสค้าง — ใช้ border-left สี (teal/warning/coral) เป็น severity strip; ฿1.82M งบ OT สื่อต้นทุนตรงไปตรงมาแทนคำว่า "ค่าใช้จ่าย"' },
-        { num: 2, title: 'Heatmap สาขา × ชั่วโมง · teal scale',
-          body: 'ทั้งกริดใช้ teal scale 5 ระดับ (ไม่ใช้ red/yellow/green) ตาม Humi warm palette — เซลล์เข้มแปลว่า attendance สูง, อ่อนสุดคือเครื่องไม่ส่งข้อมูล สื่อปัญหาเทคนิคไม่ใช่ "พนักงานแย่"' },
-        { num: 3, title: 'Legend แถบสีไล่ระดับ',
-          body: '4 ระดับ < 30% / 60% / 80% / 95%+ พร้อมตัวอย่างสี — สอน user ให้ "อ่าน" heatmap ได้ในครั้งแรก ลดการเข้าใจผิดว่า cell อ่อน = ปัญหา (อาจเป็นเครื่องเสีย)' },
-        { num: 4, title: 'Anomaly list · severity icon + CTA',
-          body: 'เรียงตามความเร่งด่วน · danger (กม.แรงงาน) → warning → butter (งบ); ปุ่ม "แก้ไข/ดู/รีวิว/ตรวจ/แจ้ง" คำกริยาที่ระบุ action ชัดเจนแทน "View" ทั่วไป' },
-      ]}
-    />
-  );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Frame 4 · ตั้งค่า / แก้ไข — HRIS shift catalog + SPD amendment
-// ═══════════════════════════════════════════════════════════════════
-function TimeWalk4() {
-  // 8-shift catalog (subset shown)
+// Y-offsets for admin page (frame-space)
+const ADMIN = {
+  kpiRow:    { y: WALK.BODY_TOP,       h: 80  },
+  heatmap:   { y: WALK.BODY_TOP + 102, h: 284 },
+  heatLegend:{ y: WALK.BODY_TOP + 364, h: 36  },
+  anomaly:   { y: WALK.BODY_TOP + 102, h: 320 },
+};
+
+const ADMIN_FRAME_H = 440;
+const ADMIN_COMMON = {
+  totalSteps: 1,
+  persona: 'HR Admin · คุณจอร์แดน',
+  frameHeight: ADMIN_FRAME_H,
+};
+
+// ══════════════════════════════════════════════════════════════════════
+// PERSONA D — HRIS page mockup
+// Shift catalog + OT/leave policy
+// ══════════════════════════════════════════════════════════════════════
+function hrisPageMockup() {
   const shifts = [
     { code: 'M-STD', n: 'กะเช้า · มาตรฐาน',     t: '09:00–18:00 · พัก 12:00–13:00', u: '1,824 คน' },
     { code: 'E-STD', n: 'กะบ่าย · มาตรฐาน',     t: '14:00–22:00 · พัก 18:00–18:30', u: '612 คน' },
@@ -669,7 +629,6 @@ function TimeWalk4() {
     { code: 'M-HOL', n: 'กะวันหยุดนักขัตฤกษ์',  t: '10:00–19:00 · OT x1.5',          u: '—', st: 'new' },
   ];
 
-  // OT policy rows
   const otRules = [
     ['OT วันทำงาน · หลังเลิกกะ', 'x 1.5'],
     ['OT วันหยุด · ในกะ',        'x 1.0'],
@@ -677,263 +636,460 @@ function TimeWalk4() {
     ['OT สูงสุดต่อสัปดาห์',      '36 ชม.'],
   ];
 
-  // SPD amendment queue (snapshot · 3 cases)
+  return (
+    <div style={{ display: 'grid', gap: 12, gridTemplateColumns: '1.3fr 1fr' }}>
+      {/* Shift catalog */}
+      <div style={{ ...walkStyles.card(false), padding: 0, overflow: 'hidden' }}>
+        <div style={{ padding: '10px 14px', borderBottom: `1px solid ${WALK.hairlineSoft}` }}>
+          <div style={walkStyles.eyebrow}>HRIS · กะมาตรฐาน</div>
+          <h3 style={{ ...walkStyles.h3Display, fontSize: 14 }}>8 กะใช้งาน · 1 กะใหม่</h3>
+        </div>
+        {shifts.map(s => (
+          <div key={s.code} style={{
+            padding: '10px 14px', borderBottom: `1px solid ${WALK.hairlineSoft}`,
+            display: 'grid', gridTemplateColumns: '70px 1fr 80px 60px',
+            gap: 10, alignItems: 'center',
+          }}>
+            <div style={{
+              fontFamily: 'ui-monospace, monospace', fontSize: 11,
+              fontWeight: 600, color: WALK.accent,
+            }}>{s.code}</div>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600 }}>{s.n}</div>
+              <div style={{
+                fontSize: 10.5, color: WALK.inkMuted, marginTop: 1,
+                fontVariantNumeric: 'tabular-nums',
+              }}>{s.t}</div>
+            </div>
+            <div style={{ fontSize: 11, color: WALK.inkSoft }}>{s.u}</div>
+            <div style={{ textAlign: 'right' }}>
+              {s.st === 'new'
+                ? <WalkTag bg={WALK.accent}>ใหม่</WalkTag>
+                : <span style={{ fontSize: 12, color: WALK.inkFaint }}>✎</span>}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* OT + leave policy */}
+      <div style={{ ...walkStyles.card(false), padding: '12px 14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+          <div>
+            <div style={walkStyles.eyebrow}>นโยบาย OT</div>
+            <h3 style={{ ...walkStyles.h3Display, fontSize: 14 }}>คำนวณตาม กม.แรงงาน</h3>
+          </div>
+          <span style={{ flex: 1 }}/>
+          <WalkTag bg={WALK.creamSoft} color={WALK.inkSoft}>มาตรฐาน</WalkTag>
+        </div>
+
+        <div style={{
+          display: 'grid', gridTemplateColumns: '1fr auto',
+          rowGap: 8, columnGap: 10, alignItems: 'center',
+        }}>
+          {otRules.map(([l, v]) => (
+            <React.Fragment key={l}>
+              <div style={{ fontSize: 11.5, color: WALK.inkSoft }}>{l}</div>
+              <div style={{
+                fontFamily: WALK.fontDisplay, fontSize: 14, fontWeight: 700,
+                color: WALK.accent, fontVariantNumeric: 'tabular-nums',
+              }}>{v}</div>
+            </React.Fragment>
+          ))}
+        </div>
+
+        <div style={{ height: 1, background: WALK.hairlineSoft, margin: '12px 0' }}/>
+
+        <h4 style={{
+          margin: '0 0 8px', fontFamily: WALK.fontDisplay,
+          fontSize: 12.5, fontWeight: 600,
+        }}>นโยบายลา</h4>
+        <div style={{
+          display: 'grid', gridTemplateColumns: '1fr auto',
+          rowGap: 6, columnGap: 10,
+        }}>
+          {[
+            ['ลาพักร้อน (ปกติ)',   '12 วัน/ปี'],
+            ['ลาพักร้อน (5 ปี+)', '15 วัน/ปี'],
+            ['ลาคลอดบุตร',         '98 วัน'],
+            ['ลากิจส่วนตัว',        '5 วัน/ปี'],
+          ].map(([l, v]) => (
+            <React.Fragment key={l}>
+              <div style={{ fontSize: 11, color: WALK.inkSoft }}>{l}</div>
+              <div style={{ fontSize: 11, fontWeight: 600 }}>{v}</div>
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Y-offsets for HRIS page (frame-space)
+const HRIS = {
+  catalog:   { y: WALK.BODY_TOP,      h: 280 },
+  otPolicy:  { y: WALK.BODY_TOP,      h: 180 },
+  leavePolicy:{ y: WALK.BODY_TOP + 196, h: 100 },
+};
+
+const HRIS_FRAME_H = 320;
+const HRIS_COMMON = {
+  totalSteps: 1,
+  persona: 'HRIS · คุณจอร์แดน',
+  frameHeight: HRIS_FRAME_H,
+};
+
+// ══════════════════════════════════════════════════════════════════════
+// PERSONA E — SPD page mockup
+// Amendment queue + active case cross-check
+// ══════════════════════════════════════════════════════════════════════
+function spdPageMockup() {
   const queue = [
     { c: 'TX-44219', t: 'ลืมลงออกงาน',      n: 'ปรีชา ว.',    sla: '2 ชม.', urg: true,  active: true },
     { c: 'TX-44215', t: 'ขอจดเวลาย้อนหลัง', n: 'นภัสรา ธ.',   sla: '4 ชม.', urg: false },
     { c: 'TX-44210', t: 'แก้เวลาเข้าผิด',   n: 'สมศักดิ์ ท.', sla: '6 ชม.', urg: false },
   ];
 
-  const mockup = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {/* Top row: HRIS shift catalog + OT policy */}
-      <div style={{ display: 'grid', gap: 12, gridTemplateColumns: '1.3fr 1fr' }}>
-        {/* Shift catalog */}
-        <div style={{ ...walkStyles.card(false), padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '10px 14px', borderBottom: `1px solid ${WALK.hairlineSoft}` }}>
-            <div style={walkStyles.eyebrow}>HRIS · กะมาตรฐาน</div>
-            <h3 style={{ ...walkStyles.h3Display, fontSize: 14 }}>8 กะใช้งาน · 1 กะใหม่</h3>
-          </div>
-          {shifts.map(s => (
-            <div key={s.code} style={{
-              padding: '10px 14px', borderBottom: `1px solid ${WALK.hairlineSoft}`,
-              display: 'grid', gridTemplateColumns: '70px 1fr 80px 60px',
-              gap: 10, alignItems: 'center',
-            }}>
+  return (
+    <div style={{ display: 'grid', gap: 12, gridTemplateColumns: '0.85fr 1.3fr' }}>
+      {/* Queue */}
+      <div style={{ ...walkStyles.card(false), padding: 0, overflow: 'hidden' }}>
+        <div style={{ padding: '10px 14px', borderBottom: `1px solid ${WALK.hairlineSoft}` }}>
+          <div style={walkStyles.eyebrow}>SPD · คิวแก้เวลา</div>
+          <h3 style={{ ...walkStyles.h3Display, fontSize: 14 }}>38 เคสรอตรวจ</h3>
+        </div>
+        {queue.map(q => (
+          <div key={q.c} style={{
+            padding: '10px 12px', borderBottom: `1px solid ${WALK.hairlineSoft}`,
+            display: 'grid', gridTemplateColumns: '24px 1fr auto',
+            gap: 8, alignItems: 'center',
+            background: q.active ? WALK.accentSoft : 'transparent',
+          }}>
+            <div style={{
+              width: 24, height: 24, borderRadius: 6,
+              background: q.active ? WALK.accent
+                        : q.urg ? WALK.dangerSoft : WALK.creamSoft,
+              color: q.active ? '#fff' : q.urg ? WALK.danger : WALK.inkSoft,
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 11, fontWeight: 700,
+            }}>!</div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 11.5, fontWeight: 600 }}>{q.t}</div>
               <div style={{
-                fontFamily: 'ui-monospace, monospace', fontSize: 11,
-                fontWeight: 600, color: WALK.accent,
-              }}>{s.code}</div>
-              <div>
-                <div style={{ fontSize: 12, fontWeight: 600 }}>{s.n}</div>
-                <div style={{
-                  fontSize: 10.5, color: WALK.inkMuted, marginTop: 1,
-                  fontVariantNumeric: 'tabular-nums',
-                }}>{s.t}</div>
-              </div>
-              <div style={{ fontSize: 11, color: WALK.inkSoft }}>{s.u}</div>
-              <div style={{ textAlign: 'right' }}>
-                {s.st === 'new'
-                  ? <WalkTag bg={WALK.accent}>ใหม่</WalkTag>
-                  : <span style={{ fontSize: 12, color: WALK.inkFaint }}>✎</span>}
-              </div>
+                fontSize: 10, color: WALK.inkMuted, marginTop: 1,
+                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              }}>{q.n} · {q.c}</div>
             </div>
-          ))}
-        </div>
-
-        {/* OT + leave policy */}
-        <div style={{ ...walkStyles.card(false), padding: '12px 14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-            <div>
-              <div style={walkStyles.eyebrow}>นโยบาย OT</div>
-              <h3 style={{ ...walkStyles.h3Display, fontSize: 14 }}>คำนวณตาม กม.แรงงาน</h3>
-            </div>
-            <span style={{ flex: 1 }}/>
-            <WalkTag bg={WALK.creamSoft} color={WALK.inkSoft}>มาตรฐาน</WalkTag>
+            <span style={{
+              background: q.urg ? WALK.coralSoft : WALK.creamSoft,
+              color: q.urg ? WALK.coral : WALK.inkSoft,
+              padding: '2px 7px', borderRadius: 999,
+              fontSize: 9.5, fontWeight: 600,
+            }}>SLA {q.sla}</span>
           </div>
-
-          {/* OT rule rows */}
-          <div style={{
-            display: 'grid', gridTemplateColumns: '1fr auto',
-            rowGap: 8, columnGap: 10, alignItems: 'center',
-          }}>
-            {otRules.map(([l, v]) => (
-              <React.Fragment key={l}>
-                <div style={{ fontSize: 11.5, color: WALK.inkSoft }}>{l}</div>
-                <div style={{
-                  fontFamily: WALK.fontDisplay, fontSize: 14, fontWeight: 700,
-                  color: WALK.accent, fontVariantNumeric: 'tabular-nums',
-                }}>{v}</div>
-              </React.Fragment>
-            ))}
-          </div>
-
-          <div style={{ height: 1, background: WALK.hairlineSoft, margin: '12px 0' }}/>
-
-          {/* Leave policy */}
-          <h4 style={{
-            margin: '0 0 8px', fontFamily: WALK.fontDisplay,
-            fontSize: 12.5, fontWeight: 600,
-          }}>นโยบายลา</h4>
-          <div style={{
-            display: 'grid', gridTemplateColumns: '1fr auto',
-            rowGap: 6, columnGap: 10,
-          }}>
-            {[
-              ['ลาพักร้อน (ปกติ)',   '12 วัน/ปี'],
-              ['ลาพักร้อน (5 ปี+)', '15 วัน/ปี'],
-              ['ลาคลอดบุตร',         '98 วัน'],
-              ['ลากิจส่วนตัว',        '5 วัน/ปี'],
-            ].map(([l, v]) => (
-              <React.Fragment key={l}>
-                <div style={{ fontSize: 11, color: WALK.inkSoft }}>{l}</div>
-                <div style={{ fontSize: 11, fontWeight: 600 }}>{v}</div>
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Bottom: SPD amendment queue + active case cross-check */}
-      <div style={{ display: 'grid', gap: 12, gridTemplateColumns: '0.85fr 1.3fr' }}>
-        {/* Queue */}
-        <div style={{ ...walkStyles.card(false), padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '10px 14px', borderBottom: `1px solid ${WALK.hairlineSoft}` }}>
-            <div style={walkStyles.eyebrow}>SPD · คิวแก้เวลา</div>
-            <h3 style={{ ...walkStyles.h3Display, fontSize: 14 }}>38 เคสรอตรวจ</h3>
+      {/* Active case cross-check */}
+      <div style={{ ...walkStyles.card(false), padding: 0, overflow: 'hidden' }}>
+        <div style={{
+          padding: '10px 14px', borderBottom: `1px solid ${WALK.hairlineSoft}`,
+          background: WALK.creamSoft, display: 'flex', alignItems: 'center',
+        }}>
+          <div>
+            <div style={walkStyles.eyebrow}>เคสที่เปิด · TX-44219</div>
+            <h3 style={{ ...walkStyles.h3Display, fontSize: 14 }}>ลืมลงออกงาน · ปรีชา ว.</h3>
           </div>
-          {queue.map(q => (
-            <div key={q.c} style={{
-              padding: '10px 12px', borderBottom: `1px solid ${WALK.hairlineSoft}`,
-              display: 'grid', gridTemplateColumns: '24px 1fr auto',
-              gap: 8, alignItems: 'center',
-              background: q.active ? WALK.accentSoft : 'transparent',
-            }}>
-              <div style={{
-                width: 24, height: 24, borderRadius: 6,
-                background: q.active ? WALK.accent
-                          : q.urg ? WALK.dangerSoft : WALK.creamSoft,
-                color: q.active ? '#fff' : q.urg ? WALK.danger : WALK.inkSoft,
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 11, fontWeight: 700,
-              }}>!</div>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 11.5, fontWeight: 600 }}>{q.t}</div>
-                <div style={{
-                  fontSize: 10, color: WALK.inkMuted, marginTop: 1,
-                  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                }}>{q.n} · {q.c}</div>
-              </div>
-              <span style={{
-                background: q.urg ? WALK.coralSoft : WALK.creamSoft,
-                color: q.urg ? WALK.coral : WALK.inkSoft,
-                padding: '2px 7px', borderRadius: 999,
-                fontSize: 9.5, fontWeight: 600,
-              }}>SLA {q.sla}</span>
-            </div>
-          ))}
+          <span style={{ flex: 1 }}/>
+          <WalkTag bg={WALK.coral}>SLA 2 ชม.</WalkTag>
         </div>
 
-        {/* Active case · System log vs Request + cross-check */}
-        <div style={{ ...walkStyles.card(false), padding: 0, overflow: 'hidden' }}>
+        <div style={{ padding: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          {/* System log */}
           <div style={{
-            padding: '10px 14px', borderBottom: `1px solid ${WALK.hairlineSoft}`,
-            background: WALK.creamSoft, display: 'flex', alignItems: 'center',
+            padding: 10, background: WALK.creamSoft, borderRadius: 8,
+            border: `1px solid ${WALK.hairlineSoft}`,
           }}>
-            <div>
-              <div style={walkStyles.eyebrow}>เคสที่เปิด · TX-44219</div>
-              <h3 style={{ ...walkStyles.h3Display, fontSize: 14 }}>ลืมลงออกงาน · ปรีชา ว.</h3>
+            <div style={{ ...walkStyles.eyebrow, fontSize: 9, marginBottom: 6 }}>
+              ข้อมูลจากระบบ · 26 พ.ค.
             </div>
-            <span style={{ flex: 1 }}/>
-            <WalkTag bg={WALK.coral}>SLA 2 ชม.</WalkTag>
-          </div>
-
-          {/* Side-by-side: system log vs employee request */}
-          <div style={{
-            padding: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10,
-          }}>
-            {/* System log (mono, factual) */}
             <div style={{
-              padding: 10, background: WALK.creamSoft, borderRadius: 8,
-              border: `1px solid ${WALK.hairlineSoft}`,
+              fontFamily: 'ui-monospace, monospace', fontSize: 10.5,
+              lineHeight: 1.6, color: WALK.inkSoft,
             }}>
-              <div style={{ ...walkStyles.eyebrow, fontSize: 9, marginBottom: 6 }}>
-                ข้อมูลจากระบบ · 26 พ.ค.
-              </div>
+              <div style={{ color: WALK.accent }}><b>09:58</b> เข้างาน (QR · CTW)</div>
+              <div style={{ color: WALK.inkFaint }}>12:01 → 12:58 พัก</div>
+              <div style={{ color: WALK.warning }}>! <b>22:00</b> auto-out</div>
               <div style={{
-                fontFamily: 'ui-monospace, monospace', fontSize: 10.5,
-                lineHeight: 1.6, color: WALK.inkSoft,
+                marginTop: 6, paddingTop: 6, borderTop: `1px solid ${WALK.hairlineSoft}`,
+                fontSize: 10, color: WALK.inkMuted,
               }}>
-                <div style={{ color: WALK.accent }}><b>09:58</b> เข้างาน (QR · CTW)</div>
-                <div style={{ color: WALK.inkFaint }}>12:01 → 12:58 พัก</div>
-                <div style={{ color: WALK.warning }}>! <b>22:00</b> auto-out</div>
-                <div style={{
-                  marginTop: 6, paddingTop: 6, borderTop: `1px solid ${WALK.hairlineSoft}`,
-                  fontSize: 10, color: WALK.inkMuted,
-                }}>
-                  เวลารวม: <b style={{ color: WALK.ink }}>11.0 ชม.</b>
-                </div>
-              </div>
-            </div>
-
-            {/* Employee request (warm, narrative) */}
-            <div style={{ padding: 10, background: WALK.accentSoft, borderRadius: 8 }}>
-              <div style={{ ...walkStyles.eyebrow, fontSize: 9, marginBottom: 6 }}>
-                คำขอจากพนักงาน
-              </div>
-              <div style={{ fontSize: 11, lineHeight: 1.5, color: WALK.ink }}>
-                ผมลืมลงเวลาออกครับ จริง ๆ ออก <b>18:30</b> ขอแก้ให้ตรงด้วย
-              </div>
-              <div style={{
-                marginTop: 6, fontFamily: 'ui-monospace, monospace',
-                fontSize: 10.5, color: WALK.inkSoft, fontVariantNumeric: 'tabular-nums',
-              }}>
-                <div>เวลาที่ขอ: <b>09:58 → 18:30</b></div>
-                <div>ระยะ: <b>8 ชม. 32 นาที</b> (+0.5 OT)</div>
+                เวลารวม: <b style={{ color: WALK.ink }}>11.0 ชม.</b>
               </div>
             </div>
           </div>
 
-          {/* Cross-reference rows */}
-          <div style={{ padding: '0 12px 10px' }}>
-            <h4 style={{
-              margin: '0 0 6px', fontFamily: WALK.fontDisplay,
-              fontSize: 12, fontWeight: 600,
-            }}>หลักฐานข้ามระบบ</h4>
-            {[
-              { l: 'กล้อง POS · CTW Floor 3', v: 'ใบเสร็จ #248 · 18:24',         ok: true },
-              { l: 'GPS เครื่องลงเวลา',         v: 'อยู่ในรัศมี 09:55–18:31',     ok: true },
-              { l: 'ผู้จัดการรับรอง',           v: 'อาทิตย์ ช. ยืนยัน 18:30',      ok: true },
-              { l: 'ขออนุมัติ OT ล่วงหน้า',     v: 'ไม่มี (ฉุกเฉิน 30 นาที)',    ok: false },
-            ].map((c, i) => (
-              <div key={i} style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                padding: '5px 0',
-                borderBottom: i === 3 ? 'none' : `1px solid ${WALK.hairlineSoft}`,
-              }}>
-                <div style={{
-                  width: 18, height: 18, borderRadius: '50%',
-                  background: c.ok ? WALK.accentSoft : WALK.warningSoft,
-                  color: c.ok ? WALK.accent : WALK.warning,
-                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 10, fontWeight: 700, flexShrink: 0,
-                }}>{c.ok ? '✓' : '!'}</div>
-                <div style={{ fontSize: 10.5, fontWeight: 500, flexShrink: 0 }}>{c.l}</div>
-                <div style={{ fontSize: 10, color: WALK.inkMuted, marginLeft: 'auto' }}>{c.v}</div>
-              </div>
-            ))}
+          {/* Employee request */}
+          <div style={{ padding: 10, background: WALK.accentSoft, borderRadius: 8 }}>
+            <div style={{ ...walkStyles.eyebrow, fontSize: 9, marginBottom: 6 }}>
+              คำขอจากพนักงาน
+            </div>
+            <div style={{ fontSize: 11, lineHeight: 1.5, color: WALK.ink }}>
+              ผมลืมลงเวลาออกครับ จริง ๆ ออก <b>18:30</b> ขอแก้ให้ตรงด้วย
+            </div>
+            <div style={{
+              marginTop: 6, fontFamily: 'ui-monospace, monospace',
+              fontSize: 10.5, color: WALK.inkSoft, fontVariantNumeric: 'tabular-nums',
+            }}>
+              <div>เวลาที่ขอ: <b>09:58 → 18:30</b></div>
+              <div>ระยะ: <b>8 ชม. 32 นาที</b> (+0.5 OT)</div>
+            </div>
           </div>
+        </div>
+
+        {/* Cross-reference rows */}
+        <div style={{ padding: '0 12px 10px' }}>
+          <h4 style={{
+            margin: '0 0 6px', fontFamily: WALK.fontDisplay,
+            fontSize: 12, fontWeight: 600,
+          }}>หลักฐานข้ามระบบ</h4>
+          {[
+            { l: 'กล้อง POS · CTW Floor 3', v: 'ใบเสร็จ #248 · 18:24',         ok: true },
+            { l: 'GPS เครื่องลงเวลา',         v: 'อยู่ในรัศมี 09:55–18:31',     ok: true },
+            { l: 'ผู้จัดการรับรอง',           v: 'อาทิตย์ ช. ยืนยัน 18:30',      ok: true },
+            { l: 'ขออนุมัติ OT ล่วงหน้า',     v: 'ไม่มี (ฉุกเฉิน 30 นาที)',    ok: false },
+          ].map((c, i) => (
+            <div key={i} style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '5px 0',
+              borderBottom: i === 3 ? 'none' : `1px solid ${WALK.hairlineSoft}`,
+            }}>
+              <div style={{
+                width: 18, height: 18, borderRadius: '50%',
+                background: c.ok ? WALK.accentSoft : WALK.warningSoft,
+                color: c.ok ? WALK.accent : WALK.warning,
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 10, fontWeight: 700, flexShrink: 0,
+              }}>{c.ok ? '✓' : '!'}</div>
+              <div style={{ fontSize: 10.5, fontWeight: 500, flexShrink: 0 }}>{c.l}</div>
+              <div style={{ fontSize: 10, color: WALK.inkMuted, marginLeft: 'auto' }}>{c.v}</div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
   );
+}
 
+// Y-offsets for SPD page (frame-space)
+const SPD = {
+  queue:     { y: WALK.BODY_TOP,       h: 320 },
+  activeCase:{ y: WALK.BODY_TOP,       h: 320 },
+  crossRef:  { y: WALK.BODY_TOP + 218, h: 106 },
+  slaTag:    { y: WALK.BODY_TOP,       h: 60  },
+};
+
+const SPD_FRAME_H = 360;
+const SPD_COMMON = {
+  totalSteps: 1,
+  persona: 'SPD · คุณพิม',
+  frameHeight: SPD_FRAME_H,
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// Sub-section EMPLOYEE — Frame 1
+// Spotlight: clock-in card (big clock + GPS chip + action row)
+// ═══════════════════════════════════════════════════════════════════
+function TimeWalkEmp1() {
   return (
     <WalkFrame
-      stepIdx={4} totalSteps={4}
-      persona="HRIS + SPD · จอร์แดน + พิม"
-      title="ตั้งค่า + แก้ไข · นโยบาย → คิว → หลักฐาน"
-      narrative="HRIS วางกะ 8 แบบ + OT/leave policy ครั้งเดียวให้ใช้ทั้งบริษัท; SPD รับงานเป็นเคสจาก amendment queue 38 เคส · หน้า detail วาง system log (mono · factual) เทียบ employee request (warm · narrative) ข้างกัน + ตรวจ POS/GPS/ผู้จัดการ ก่อนตัดสินใจ"
-      mockup={mockup}
+      {...EMP_COMMON}
+      stepIdx={1}
+      title="ลงเวลา · นาฬิกาใหญ่ + GPS ยืนยัน + biometric fallback"
+      narrative="พนักงานเปิด Time ตอนเช้าเพื่อตอบ 'ลงเวลาแล้วหรือยัง' — clock-in card ขนาดใหญ่อยู่บนสุด นาฬิกา 46px อ่านได้แวบเดียว chip เขียว + GPS ตรงพิกัดลดข้อสงสัย ปุ่มออกงานเป็น primary path"
+      mockup={empPageMockup()}
+      dim
       callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 6,   y: WALK.BODY_TOP + 6,   w: 482, h: 220 },
-        { num: 2, x: WALK.MOCKUP_X + 502, y: WALK.BODY_TOP + 6,   w: 366, h: 220 },
-        { num: 3, x: WALK.MOCKUP_X + 6,   y: WALK.BODY_TOP + 238, w: 320, h: 280 },
-        { num: 4, x: WALK.MOCKUP_X + 342, y: WALK.BODY_TOP + 290, w: 526, h: 130 },
+        { num: 1, x: SPOTX,                   y: EMP.clockCard.y, w: 468, h: EMP.clockCard.h, color: WALK.accent },
+        { num: 2, x: SPOTX + 14,              y: EMP.clockBtn.y,  w: 210, h: EMP.clockBtn.h,  color: WALK.coral },
+        { num: 3, x: WALK.MOCKUP_X + 482,     y: EMP.leaveGrid.y, w: SPOTW - 486, h: EMP.leaveGrid.h, color: WALK.indigo },
       ]}
       annotations={[
-        { num: 1, title: 'Shift catalog · code + เวลา + จำนวนใช้งาน',
-          body: 'รหัสกะ mono font (M-STD/E-STD/N-STD/M-HOL) ทำให้อ้างถึงในที่อื่นได้ตรงกัน; แสดงจำนวน "1,824 คน" บอก HRIS ว่า change กะนี้กระทบใคร — ลดความผิดพลาดการแก้ policy' },
-        { num: 2, title: 'OT/leave policy ในการ์ดเดียว',
-          body: 'OT multiplier (x1.5 / x3.0) เรียงจากปกติ → วันหยุด → สูงสุด/สัปดาห์; leave policy ใต้เส้น divider — ทุก rule ที่ payroll ใช้คำนวณอยู่หน้าเดียว แก้แล้ว publish ทันที' },
-        { num: 3, title: 'SPD queue · SLA tag เน้น urgency',
-          body: 'แต่ละเคสมี ! icon (danger = ใกล้เกิน · neutral = ปกติ) + SLA tag (coral "2 ชม." vs cream "6 ชม.") + เคสที่เปิดอยู่ background teal — SPD ไม่ต้องเดาว่าจะหยิบเคสไหน' },
-        { num: 4, title: 'System log เทียบ Request · ข้างกัน',
-          body: 'ซ้าย cream + mono = "ระบบบันทึก" / ขวา teal-soft + sans = "คนพูด" · ใต้นั้น POS/GPS/ผจก./pre-approval สี่จุดข้ามระบบ — SPD ตัดสินใจจากหลักฐาน ไม่ใช่อารมณ์' },
+        { num: 1, title: 'นาฬิกาใหญ่ + สถานะเข้างาน + GPS',
+          body: 'เวลาปัจจุบัน 14:32 display font 46px อ่านได้แวบเดียว chip เขียว "เข้างานแล้ว 09:02" + chip "CTW Floor 1 · GPS ตรงพิกัด" ตอบ 2 คำถามในแวบเดียว ไม่ต้องเสียเวลาหาข้อมูลซ้ำ', color: WALK.accent },
+        { num: 2, title: 'Primary CTA + biometric fallback',
+          body: 'ปุ่ม "ลงเวลาออกงาน" teal solid = default path; QR/fingerprint เป็น 38px ghost ข้างๆ เพราะ sensor พลาดได้ (มือเปียก/แสงน้อย) — ทางเลือก manual เป็น safety net ป้องกันพนักงานติดที่ door', color: WALK.coral },
+        { num: 3, title: 'Leave balance · progress bar แทนตัวเลขล้วน',
+          body: 'พักร้อน/ป่วย/กิจ/สะสม แต่ละก้อนใช้สีต่างกัน (teal/warning/indigo/sage) + แท่ง progress ทำให้ scan ได้ว่า "เหลือเยอะหรือใกล้หมด" ใน 1 วินาทีโดยไม่ต้องคำนวณ', color: WALK.indigo },
       ]}
     />
   );
 }
 
-// ── Expose to window ───────────────────────────────────────────────
-Object.assign(window, { TimeWalk1, TimeWalk2, TimeWalk3, TimeWalk4 });
+// ═══════════════════════════════════════════════════════════════════
+// Sub-section EMPLOYEE — Frame 2
+// Spotlight: 7-day timesheet (today row highlight + color status)
+// ═══════════════════════════════════════════════════════════════════
+function TimeWalkEmp2() {
+  return (
+    <WalkFrame
+      {...EMP_COMMON}
+      stepIdx={2}
+      title="Timesheet 7 วัน · สีบอก status แทน column 'สถานะ'"
+      narrative="พนักงานอยากรู้ 'สัปดาห์นี้ทำไปกี่ชม. มีสายไหม มี OT ไหม' — timesheet 7 แถว ใช้ background highlight วันนี้ + สี OT/มาสาย/ลา แทน status column แยก ลด visual noise ให้ scan ได้เร็ว"
+      mockup={empPageMockup()}
+      dim
+      callouts={[
+        { num: 1, x: SPOTX,              y: EMP.timesheet.y, w: SPOTW, h: EMP.timesheet.h, color: WALK.accent },
+        { num: 2, x: SPOTX + 14,         y: EMP.todayRow.y,  w: SPOTW - 18, h: EMP.todayRow.h, color: WALK.coral },
+        { num: 3, x: SPOTX + 430,        y: EMP.timesheet.y, w: 90, h: EMP.timesheet.h, color: WALK.indigo },
+      ]}
+      annotations={[
+        { num: 1, title: 'Timesheet 7 วัน · คอลัมน์ครอบ lifecycle',
+          body: 'วันที่ / กะ / เข้า / พัก / ออก / OT / รวม ครอบ workflow เดียวจบ; ลาพักร้อน แสดงเป็นชื่อลาในคอลัมน์ "กะ" แทนที่จะซ่อน — พนักงานเห็น pattern การมาทำงานทั้งสัปดาห์ในแถวเดียว', color: WALK.accent },
+        { num: 2, title: 'วันนี้ highlight teal-soft + tag กำลังทำ',
+          body: 'แถววันนี้ background accentSoft ชัดเจนโดยไม่ต้องหา; มาสายขึ้นสี warning +8 นาที · OT ขึ้น teal accent — ใช้สีสื่อ status แทน column "สถานะ" ที่ต้องอ่านทุกแถว ลด cognitive load', color: WALK.coral },
+        { num: 3, title: 'คอลัมน์ OT · teal accent = มูลค่าบวก',
+          body: 'OT สีเดียวกับ brand teal สื่อว่า "ทำงานพิเศษมีค่า" ไม่ใช่ warning เหลืองหรือแดง — ตรงกับ design.md: OT ไม่ใช่ violation; dash "—" สื่อ "ไม่มี" ชัดกว่า 0', color: WALK.indigo },
+      ]}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Sub-section MANAGER — Frame 1
+// Spotlight: Gantt 7-day + inline approve buttons
+// ═══════════════════════════════════════════════════════════════════
+function TimeWalkManager1() {
+  return (
+    <WalkFrame
+      {...MGR_COMMON}
+      stepIdx={1}
+      title="ดูทีม · Gantt 7 วัน + อนุมัติ inline ไม่ต้องเปลี่ยนหน้า"
+      narrative="Manager หน้าร้าน 14 คนต้องการเห็น 'กะของใครวันไหน' ในจอเดียว — Gantt 7 วัน × พนักงาน บล็อกสี M/E ทำให้ scan ปัญหากำลังพล (ป่วย/พักร้อน/OT) ได้แวบเดียว; inbox ขวาให้ approve โดยไม่ต้องเปลี่ยนหน้า"
+      mockup={managerPageMockup()}
+      dim
+      callouts={[
+        { num: 1, x: SPOTX,                        y: MGR.ganttRow.y, w: 530, h: MGR.ganttRow.h, color: WALK.accent },
+        { num: 2, x: SPOTX + 14,                   y: MGR.legend.y,   w: 516, h: MGR.legend.h,   color: WALK.sage },
+        { num: 3, x: WALK.MOCKUP_X + 548,          y: MGR.inbox.y,    w: SPOTW - 552, h: MGR.inboxSLA.h, color: WALK.coral },
+        { num: 4, x: WALK.MOCKUP_X + 548,          y: MGR.approve.y,  w: SPOTW - 552, h: MGR.approve.h, color: WALK.butter },
+      ]}
+      annotations={[
+        { num: 1, title: '7-day Gantt · บล็อกสี M/E สื่อ pattern',
+          body: 'แถวพนักงาน × คอลัมน์วัน บล็อก M 09–18 teal-soft / E 14–22 butter-soft / ป่วย warning / พักร้อน indigo ใช้ token สีเดียวกับ status ทั่ว Humi ทำให้ Manager อ่านเป็น pattern ได้โดยไม่ต้องอ่านทุก label', color: WALK.accent },
+        { num: 2, title: 'Legend ติดตาราง · ลด onboarding cost',
+          body: 'อธิบายรหัสกะ (M/E + ป่วย + พักร้อน) วางใน footer bar cream ไม่บังตาราง แต่ก็ไม่ต้องหา — ลด support ticket "บล็อกสีฟ้าหมายความว่าอะไร" โดยเฉพาะผู้จัดการที่เพิ่งรับทีมใหม่', color: WALK.sage },
+        { num: 3, title: 'Inbox SLA 24 ชม. · urgency ชัด',
+          body: 'SLA coral tag เตือนว่าต้องตัดสินใจในวัน; 3 ประเภทคำขอ OT/ลา/ลาย้อนหลัง แยกสี (butter/indigo/warning) สื่อ urgency ต่างกัน ก่อนที่ Manager จะอ่านรายละเอียด', color: WALK.coral },
+        { num: 4, title: 'Approve/Reject inline + เหตุผล quote',
+          body: 'ปุ่ม approve teal + ปฏิเสธ ghost อยู่ใน card เดียวกัน ไม่ต้องเข้า detail page; เหตุผลการขอแสดงเป็น quote italic "ครอบครัวมาเที่ยว" humanise ก่อนตัดสินใจ ลด approval แบบ blind', color: WALK.butter },
+      ]}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Sub-section ADMIN — Frame 1
+// Spotlight: KPI row + heatmap + anomaly list
+// ═══════════════════════════════════════════════════════════════════
+function TimeWalkAdmin1() {
+  return (
+    <WalkFrame
+      {...ADMIN_COMMON}
+      stepIdx={1}
+      title="ภาพรวม · 2,847 EE ใน 3 ก้อน: KPI · heatmap · anomaly"
+      narrative="HR Admin บริหาร 2,847 คน 38 สาขา ไม่สามารถ scan รายคน — จัด 3 ก้อน: KPI row บนสุด (5 ตัวเลขสรุป), heatmap สาขา × ชั่วโมงให้เห็น pattern เชิงพื้นที่/เวลา, anomaly list เรียงตามความเร่งด่วน"
+      mockup={adminPageMockup()}
+      dim
+      callouts={[
+        { num: 1, x: SPOTX,              y: ADMIN.kpiRow.y,   w: SPOTW, h: ADMIN.kpiRow.h,    color: WALK.accent },
+        { num: 2, x: SPOTX,              y: ADMIN.heatmap.y,  w: 526,   h: ADMIN.heatmap.h,   color: WALK.indigo },
+        { num: 3, x: SPOTX + 14,         y: ADMIN.heatLegend.y, w: 512, h: ADMIN.heatLegend.h, color: WALK.sage },
+        { num: 4, x: WALK.MOCKUP_X + 540, y: ADMIN.anomaly.y, w: SPOTW - 544, h: ADMIN.anomaly.h, color: WALK.coral },
+      ]}
+      annotations={[
+        { num: 1, title: 'KPI row · border-left severity strip',
+          body: 'ลงเวลา/ลา/มาสาย/OT/เคสค้าง ใช้ border-left สี (teal/warning/coral) เป็น severity strip ทำให้ scan เฉพาะตัวเลขที่มีสีก่อน ไม่ต้องอ่านทุก card; ฿1.82M OT สื่อต้นทุนตรงแทน "จำนวนชั่วโมง"', color: WALK.accent },
+        { num: 2, title: 'Heatmap teal scale · สีอ่อน ≠ ปัญหา',
+          body: 'ทั้งกริดใช้ teal scale 5 ระดับ ไม่ใช้ red/yellow/green เพราะสีแดงสื่อ "พนักงานแย่" แต่จริงๆ อาจเป็นเครื่องเสีย — teal อ่อนสุดหมายถึง "ไม่มีข้อมูล" ลดการตีความผิดจาก color convention', color: WALK.indigo },
+        { num: 3, title: 'Legend ไล่ระดับ 4 ขั้น',
+          body: '< 30% / 60% / 80% / 95%+ พร้อมตัวอย่างสี สอน user ให้อ่าน heatmap ได้ครั้งแรก โดยไม่ต้อง hover หรือ tooltip — ลด learning curve สำหรับ Admin ที่เพิ่งเริ่มใช้ module', color: WALK.sage },
+        { num: 4, title: 'Anomaly list · CTA คำกริยาเฉพาะ',
+          body: 'เรียง danger → warning → butter; ปุ่ม "แก้ไข/ดู/รีวิว/ตรวจ/แจ้ง" ระบุ action ชัดเจนแทน "View" ทั่วไป — ลด decision fatigue ว่าต้องทำอะไรกับแต่ละ anomaly', color: WALK.coral },
+      ]}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Sub-section HRIS — Frame 1
+// Spotlight: shift catalog + OT/leave policy
+// ═══════════════════════════════════════════════════════════════════
+function TimeWalkHris1() {
+  return (
+    <WalkFrame
+      {...HRIS_COMMON}
+      stepIdx={1}
+      title="ตั้งค่ากะ · shift catalog + OT/leave policy ในหน้าเดียว"
+      narrative="HRIS วางกะ 8 แบบ + OT/leave policy ครั้งเดียวให้ใช้ทั้งบริษัท — รหัสกะ mono font ทำให้อ้างถึงในที่อื่นได้ตรงกัน; จำนวนคนใช้งานแต่ละกะบอกว่า change กะนี้กระทบใคร"
+      mockup={hrisPageMockup()}
+      dim
+      callouts={[
+        { num: 1, x: SPOTX,                   y: HRIS.catalog.y,    w: 490, h: HRIS.catalog.h,    color: WALK.accent },
+        { num: 2, x: WALK.MOCKUP_X + 506,     y: HRIS.otPolicy.y,   w: SPOTW - 510, h: HRIS.otPolicy.h,   color: WALK.butter },
+        { num: 3, x: WALK.MOCKUP_X + 506,     y: HRIS.leavePolicy.y, w: SPOTW - 510, h: HRIS.leavePolicy.h, color: WALK.sage },
+      ]}
+      annotations={[
+        { num: 1, title: 'Shift catalog · code mono + จำนวนคนใช้งาน',
+          body: 'รหัสกะ M-STD / E-STD / N-STD / M-HOL mono font ทำให้อ้างถึงในที่อื่นได้ตรงกัน; "1,824 คน" บอก HRIS ว่า change กะนี้กระทบใคร — เลี่ยงการแก้ policy โดยไม่รู้ impact; tag "ใหม่" สีเด่นบน M-HOL', color: WALK.accent },
+        { num: 2, title: 'OT multiplier · ครบ 3 กรณีตาม กม.',
+          body: 'OT x1.5 วันทำงาน / x1.0 วันหยุดในกะ / x3.0 วันหยุดเกินกะ / สูงสุด 36 ชม./สัปดาห์ — ทุก rule ที่ payroll ใช้คำนวณอยู่ในที่เดียว แก้แล้ว publish ทันทีไม่ต้องอัปเดตหลายจุด; ไม่ใช้ text "ตาม พรบ." ที่คลุมเครือ', color: WALK.butter },
+        { num: 3, title: 'Leave policy · divider แยก OT ชัด',
+          body: 'เส้น divider คั่น OT กับ leave ทำให้สองก้อนอ่านแยกกันได้ แต่อยู่ card เดียว — HRIS ไม่ต้องเปิด 2 หน้า; ลาคลอด 98 วัน / กิจ 5 วัน ตามกฎหมายแรงงานไทย ไม่ใช่ค่า default', color: WALK.sage },
+      ]}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Sub-section SPD — Frame 1
+// Spotlight: amendment queue + cross-check system log vs request
+// ═══════════════════════════════════════════════════════════════════
+function TimeWalkSpd1() {
+  return (
+    <WalkFrame
+      {...SPD_COMMON}
+      stepIdx={1}
+      title="แก้เวลา · คิว SLA + system log เทียบ request ข้างกัน"
+      narrative="SPD รับงานเป็นเคส 38 คิว — queue ซ้ายเรียงตาม SLA urgency; detail ขวาวาง system log (mono/factual) เทียบ employee request (warm/narrative) + cross-check POS/GPS/ผู้จัดการ ก่อนตัดสินใจ"
+      mockup={spdPageMockup()}
+      dim
+      callouts={[
+        { num: 1, x: SPOTX,                   y: SPD.queue.y,     w: 318, h: SPD.queue.h,     color: WALK.accent },
+        { num: 2, x: SPOTX + 14,              y: SPD.slaTag.y,    w: 304, h: SPD.slaTag.h,    color: WALK.coral },
+        { num: 3, x: WALK.MOCKUP_X + 334,     y: SPD.activeCase.y, w: SPOTW - 338, h: 210,    color: WALK.indigo },
+        { num: 4, x: WALK.MOCKUP_X + 334,     y: SPD.crossRef.y,  w: SPOTW - 338, h: SPD.crossRef.h, color: WALK.sage },
+      ]}
+      annotations={[
+        { num: 1, title: 'Queue 38 เคส · ! icon + teal highlight เคสเปิด',
+          body: 'แต่ละเคสมี ! icon (danger active / neutral waiting) บอก urgency ด้วยตา; เคสที่เปิดอยู่ background teal-soft ทำให้ SPD รู้ทันทีว่ากำลังดูเคสไหน — ไม่ต้องจำ case ID ไว้ในหัว', color: WALK.accent },
+        { num: 2, title: 'SLA tag coral · urgency เป็นตัวเลข',
+          body: '"SLA 2 ชม." coral tag เตือนว่าเหลือเวลาจำกัด; "SLA 6 ชม." cream-soft สื่อ less urgent — SPD เลือก priority โดยไม่ต้องคิดเอง ป้องกันการหยิบเคสตามความชอบแทนที่จะเป็น urgency', color: WALK.coral },
+        { num: 3, title: 'System log vs Request · mono เทียบ narrative',
+          body: 'ซ้าย cream + mono = "ระบบบันทึก 22:00 auto-out" / ขวา teal-soft + sans = "ผมออกจริงๆ 18:30" — SPD เห็นข้อมูล 2 ชุดในมุมมองที่ต่างกัน พิสูจน์ความจริงได้เองโดยไม่ต้องถามทีม', color: WALK.indigo },
+        { num: 4, title: 'Cross-reference 4 จุด · ตัดสินใจจากหลักฐาน',
+          body: 'POS/GPS/ผู้จัดการ ✓ ✓ ✓ · pre-approval OT ! — 3 จาก 4 หลักฐานยืนยัน SPD ตัดสินใจจากข้อมูล ไม่ใช่อารมณ์; ✓ teal-soft / ! warning-soft ใช้สีตามหลัก Humi ไม่ใช่ red ที่ตีความว่า "ผิด"', color: WALK.sage },
+      ]}
+    />
+  );
+}
+
+// ── Expose all 6 components to window ─────────────────────────────
+Object.assign(window, {
+  TimeWalkEmp1,
+  TimeWalkEmp2,
+  TimeWalkManager1,
+  TimeWalkAdmin1,
+  TimeWalkHris1,
+  TimeWalkSpd1,
+});

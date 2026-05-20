@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/>
+<title>Humi · Design Walkthroughs · All Modules</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="stylesheet" href="prod-tokens.css"/>
+<link rel="stylesheet" href="styles.css"/>
+<style>
+  body { margin: 0; background: #1a1f29; font-family: 'CPN', 'Anuphan', system-ui, sans-serif; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- Canvas + shared shell — load first -->
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="walkthrough-shell.jsx"></script>
+
+<!-- Per-module walkthroughs -->
+<script type="text/babel" src="walkthrough-home.jsx"></script>
+<script type="text/babel" src="walkthrough-employee.jsx"></script>
+<script type="text/babel" src="walkthrough-hire.jsx"></script>
+<script type="text/babel" src="walkthrough-probation.jsx"></script>
+<script type="text/babel" src="walkthrough-lifecycle.jsx"></script>
+<script type="text/babel" src="walkthrough-offboard.jsx"></script>
+<script type="text/babel" src="walkthrough-orgchart.jsx"></script>
+<script type="text/babel" src="walkthrough-workforce.jsx"></script>
+<script type="text/babel" src="walkthrough-payroll.jsx"></script>
+<script type="text/babel" src="walkthrough-benefit.jsx"></script>
+<script type="text/babel" src="walkthrough-time.jsx"></script>
+
+<script type="text/babel">
+const { DesignCanvas, DCSection, DCArtboard } = window;
+
+const W = 1500, H = 760;
+
+function Sect({ id, emoji, title, persona, comps }) {
+  return (
+    <DCSection id={id}
+               title={`${emoji} ${title}`}
+               subtitle={`Design Walkthrough · 4 frames · ${persona}`}>
+      {comps.map((C, i) => {
+        const Comp = window[C.name];
+        if (!Comp) {
+          return (
+            <DCArtboard key={C.name} id={`${id}-${i+1}`}
+                        label={`${String(i+1).padStart(2,'0')} · ${C.label} (missing: ${C.name})`}
+                        width={W} height={H}>
+              <div style={{padding:40,fontFamily:'system-ui',color:'#888'}}>Component <code>{C.name}</code> not loaded</div>
+            </DCArtboard>
+          );
+        }
+        return (
+          <DCArtboard key={C.name} id={`${id}-${i+1}`}
+                      label={`${String(i+1).padStart(2,'0')} · ${C.label}`}
+                      width={W} height={H}>
+            <Comp/>
+          </DCArtboard>
+        );
+      })}
+    </DCSection>
+  );
+}
+
+function App() {
+  return (
+    <DesignCanvas>
+
+      <Sect id="walk-home" emoji="🏠" title="Home · หน้าแรก"
+            persona="Manager"
+            comps={[
+              { name: 'HomeWalk1', label: 'แรกเข้า · Greeting + Today pulse' },
+              { name: 'HomeWalk2', label: 'รับข้อมูล · Organisational Updates' },
+              { name: 'HomeWalk3', label: 'ลงมือทำ · Approvals + เอกสารค้าง' },
+              { name: 'HomeWalk4', label: 'เชื่อมสัมพันธ์ · Announcements + Birthday' },
+            ]}/>
+
+      <Sect id="walk-employee" emoji="👥" title="Employee · ทะเบียนพนักงาน"
+            persona="Employee · Manager · HR Admin"
+            comps={[
+              { name: 'EmployeeWalk1', label: 'Self-service · พนักงานดูข้อมูลตัวเอง' },
+              { name: 'EmployeeWalk2', label: 'Manager team view · ทีม 14 คน' },
+              { name: 'EmployeeWalk3', label: 'Admin registry · 2,847 คน' },
+              { name: 'EmployeeWalk4', label: 'Detail hub · timeline + 9 actions' },
+            ]}/>
+
+      <Sect id="walk-hire" emoji="🆕" title="Hire · บันทึกพนักงานใหม่"
+            persona="HR Admin"
+            comps={[
+              { name: 'HireWalk1', label: 'Checkpoint sidebar · 3-step wizard' },
+              { name: 'HireWalk2', label: 'Who · Identity + contact + work permit' },
+              { name: 'HireWalk3', label: 'Job · Assignment + compensation' },
+              { name: 'HireWalk4', label: 'Review · approval + summary snapshot' },
+            ]}/>
+
+      <Sect id="walk-probation" emoji="📋" title="Probation · ประเมินทดลองงาน"
+            persona="Manager · HR Admin"
+            comps={[
+              { name: 'ProbationWalk1', label: 'Inbox triage · 4-tier urgency filter' },
+              { name: 'ProbationWalk2', label: 'Urgency cue · countdown banner' },
+              { name: 'ProbationWalk3', label: 'Detail assessment · outcome + rating' },
+              { name: 'ProbationWalk4', label: 'Conditional outcome · Extend/Pass/No-pass' },
+            ]}/>
+
+      <Sect id="walk-lifecycle" emoji="🔄" title="Lifecycle · Transfer + Onboard + Confirm"
+            persona="Manager · HR Admin"
+            comps={[
+              { name: 'LifecycleWalk1', label: 'Transfer request · Manager review' },
+              { name: 'LifecycleWalk2', label: 'Transfer execution · 4-lane checklist' },
+              { name: 'LifecycleWalk3', label: 'Onboarding · first-day kit + IT setup' },
+              { name: 'LifecycleWalk4', label: 'Confirmation · permanent unlock' },
+            ]}/>
+
+      <Sect id="walk-offboard" emoji="🚪" title="Offboard · ลาออก"
+            persona="Manager · HR Admin"
+            comps={[
+              { name: 'OffboardWalk1', label: 'Manager approval · resignation + reason' },
+              { name: 'OffboardWalk2', label: 'Clearance checklist · 4 categories' },
+              { name: 'OffboardWalk3', label: 'Final pay · termination payroll' },
+              { name: 'OffboardWalk4', label: 'Exit summary · record finalised' },
+            ]}/>
+
+      <Sect id="walk-orgchart" emoji="🌳" title="OrgChart · ผังองค์กร"
+            persona="All personas"
+            comps={[
+              { name: 'OrgChartWalk1', label: 'Tree view · chain of command' },
+              { name: 'OrgChartWalk2', label: 'Person panel · stats + contact' },
+              { name: 'OrgChartWalk3', label: 'Search & list view · filter by branch' },
+              { name: 'OrgChartWalk4', label: 'Cross-org exploration · span/depth' },
+            ]}/>
+
+      <Sect id="walk-workforce" emoji="📅" title="Workforce · Roster + Swap + Asset"
+            persona="Manager · HR Admin"
+            comps={[
+              { name: 'WorkforceWalk1', label: 'Roster grid · 7-day × 7-people' },
+              { name: 'WorkforceWalk2', label: 'Auto-fill + conflict highlighting' },
+              { name: 'WorkforceWalk3', label: 'Shift swap queue · impact check' },
+              { name: 'WorkforceWalk4', label: 'Asset management · inventory' },
+            ]}/>
+
+      <Sect id="walk-payroll" emoji="💰" title="Payroll · เงินเดือน"
+            persona="Employee · Manager · HR Admin · HRIS · SPD"
+            comps={[
+              { name: 'PayrollWalk1', label: 'Employee payslip · gross/deductions/net' },
+              { name: 'PayrollWalk2', label: 'Manager review · team + OT/bonus' },
+              { name: 'PayrollWalk3', label: 'Admin payroll run · variance ±15%' },
+              { name: 'PayrollWalk4', label: 'HRIS + SPD · tax formula + reconcile' },
+            ]}/>
+
+      <Sect id="walk-benefit" emoji="🏥" title="Benefit · สวัสดิการ"
+            persona="Employee · Manager · HR Admin · HRIS"
+            comps={[
+              { name: 'BenefitWalk1', label: 'Employee wallets · hospital/dental/glasses' },
+              { name: 'BenefitWalk2', label: 'Claim review · OCR + auto-approval' },
+              { name: 'BenefitWalk3', label: 'HRIS plan catalog · 5 plans + eligibility' },
+              { name: 'BenefitWalk4', label: 'Admin operations · assignment + rule' },
+            ]}/>
+
+      <Sect id="walk-time" emoji="⏱" title="Time · ลงเวลา + ลา"
+            persona="Employee · Manager · HR Admin · HRIS · SPD"
+            comps={[
+              { name: 'TimeWalk1', label: 'Employee clock-in · GPS + timesheet 7-day' },
+              { name: 'TimeWalk2', label: 'Manager team calendar · 7-day Gantt' },
+              { name: 'TimeWalk3', label: 'Admin dashboard · KPIs + heatmap' },
+              { name: 'TimeWalk4', label: 'HRIS + SPD · catalog + amendment queue' },
+            ]}/>
+
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>

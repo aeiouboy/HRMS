@@ -239,7 +239,7 @@ function TimeWalk1() {
         { num: 1, title: 'นาฬิกาใหญ่ + GPS ยืนยันพิกัด',
           body: 'เวลาปัจจุบัน 14:32 ฟอนต์ display 46px อ่านได้แวบเดียว; chip เขียว "เข้างานแล้ว 09:02" + chip "CTW Floor 1 · GPS ตรงพิกัด" ลดข้อสงสัยว่าระบบบันทึกถูกหรือไม่' },
         { num: 2, title: 'Primary action + biometric fallback',
-          body: 'ปุ่ม "ลงเวลาออกงาน" teal solid กินพื้นที่ส่วนใหญ่ + ปุ่ม QR/fingerprint ขนาด 38px ข้าง ๆ — primary path ชัด แต่ยังเปิด biometric ให้คนที่ไม่อยากกดปุ่ม' },
+          body: 'ปุ่ม "ลงเวลาออกงาน" teal solid เป็น default path — biometric (QR/fingerprint) เป็น 38px chip ข้างๆ เพราะ sensor พลาดได้ (มือเปียก/แสงน้อย) ปุ่ม manual เป็น safety net ให้ไม่มีพนักงานติดที่ door เพราะอ่าน lay ไม่ติด' },
         { num: 3, title: 'Leave balance · 4 ประเภท · progress bar',
           body: 'พักร้อน/ป่วย/กิจ/สะสม แต่ละก้อนใช้สีคนละ token (teal/warning/indigo/sage) + แท่ง progress ใช้แทนตัวเลขล้วน ทำให้ scan ได้ว่า "เหลือเยอะหรือใกล้หมด" ใน 1 วินาที' },
         { num: 4, title: 'Timesheet 7 วัน · highlight วันนี้',

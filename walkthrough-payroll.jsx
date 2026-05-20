@@ -238,8 +238,8 @@ function PayrollWalk1() {
           body: 'รายได้ใช้ teal accent, หักใช้ warning butter — แยก mental model ออกชัด ไม่ต้องอ่านเครื่องหมาย ±; แต่ละบรรทัดมี sub-label (5% สูงสุด · บริษัทสมทบ 4%) อธิบาย formula' },
         { num: 3, title: 'Net pay accent box ปิดท้าย',
           body: 'ย้ำ net pay อีกครั้งใน accent-soft box หลัง breakdown — ปิด loop "ดูตัวเลข → อ่านรายละเอียด → ยืนยันตัวเลขเดิม" ลด anxiety ว่าคำนวณถูกต้อง' },
-        { num: 4, title: 'YTD strip 4 ตัวชี้วัด',
-          body: 'รายได้/ภาษี/SS/PVD ใน K format เพื่อ scan ง่าย — เตรียมพร้อมยื่นภาษีปลายปี (ภงด.91) โดยพนักงานไม่ต้องร้องขอจาก HR' },
+        { num: 4, title: 'YTD strip · self-service ภาษี',
+          body: 'แสดง YTD รายได้/ภาษี/SS/PVD บนสลิปทุกใบ — แทนที่จะต้องร้องขอจาก HR ตอนยื่น ภงด.91 ปลายปี พนักงานเช็คเองได้ทุกเดือน; K format (24K แทน 24,418) ให้ scan แนวโน้มได้ใน 1 วินาที' },
       ]}
     />
   );

@@ -201,7 +201,7 @@ function LifecycleWalk1() {
         { num: 2, title: 'From → To · visual diff',
           body: 'สาขาเดิม creamSoft กลาง · สาขาใหม่ accentSoft + lable teal เพื่อ direction ชัดเจน; pill เขียว "หัวหน้าใหม่ตกลงรับ" ลด risk ของการอนุมัติแล้วไม่มีคนรับ' },
         { num: 3, title: '2 ปุ่ม decision · ไม่มี Reject',
-          body: 'แสดงแค่ "ขอคุยก่อน" + "อนุมัติ" — Reject อยู่ที่ footer ลด weight; การ "discuss" เป็น healthy middle ground ที่ workflow เดิมมักไม่ม' },
+          body: 'แสดงแค่ "ขอคุยก่อน" + "อนุมัติ" — Reject อยู่ที่ footer ลด weight; การ "discuss" เป็น healthy middle ground ที่ workflow เดิมมักไม่มี ทำให้ Manager ไม่ต้อง reject เพื่อขอข้อมูลเพิ่ม' },
         { num: 4, title: 'Sticky timeline · ฉันอยู่ขั้นไหน',
           body: 'Step 3 highlight teal "คุณอยู่ขั้นนี้" — Manager เห็น context ว่า 2 ขั้นก่อนเสร็จแล้ว และอีก 2 ขั้นหลังเป็นใคร ลด anxiety เรื่อง "อนุมัติแล้วยังไงต่อ"' },
       ]}

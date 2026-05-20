@@ -1,27 +1,31 @@
 // walkthrough-offboard.jsx
-// Offboard module Design Walkthrough.
-// 4 frames following the resignation → final pay arc:
-//   01 อนุมัติลาออก   — Manager approval (request + reason + replacement + decision)
-//   02 Clearance      — 4-category checklist (equipment · access · tax · interview)
-//   03 Final pay      — termination payroll + leave encashment + PF + tax true-up
-//   04 ปิด record      — exit summary + reference letter + farewell post
+// Offboard module Design Walkthrough (Manager + HR Admin personas).
 //
-// Each mockup is an inline-style replica of the corresponding panel in
-// mod-offboard.jsx — kept inline so this storyboard is robust against
-// changes in the live mockup file.
+// RETROFIT PATTERN (static page + rotating spotlight):
+//   offboardPageMockup() renders the entire Offboarding Workspace —
+//   Manager approval section (employee header + reason + decision +
+//   timeline) stacked above HR Admin clearance KPI strip + 4-tab bar +
+//   2 checklist groups, then the final-pay ledger + bank/docs/CTA,
+//   ending with the dark "ปิดเคส" hero + letters + farewell post.
+//   The same page is reused as the static background of every frame;
+//   spotlight rotates between regions.
+//
+// Frames (the resignation → final-pay arc):
+//   01 อนุมัติลาออก   — Manager approval (top of page)
+//   02 Clearance      — 4-category checklist (mid-top)
+//   03 Final pay      — termination payroll ledger (mid-bottom)
+//   04 ปิด record      — exit summary + letters + farewell (bottom)
 
 const { WALK, WalkFrame, WalkAvatar, WalkTag, walkStyles } = window;
 
-// ═══════════════════════════════════════════════════════════════════
-// Frame 1 · อนุมัติลาออก — Manager approval
-// ═══════════════════════════════════════════════════════════════════
-function OffboardWalk1() {
-  const mockup = (
+// ═════════════════════════════════════════════════════════════════════
+// ── Section 1 · Manager approval (frame 1 target) ─────────────────────
+// ═════════════════════════════════════════════════════════════════════
+function ManagerApprovalSection() {
+  return (
     <div style={{ display: 'grid', gap: 14, gridTemplateColumns: '1.4fr 1fr' }}>
-      {/* LEFT column · employee header + reason + decision */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-
-        {/* Employee header card with timeline metrics */}
+        {/* Employee header card */}
         <div style={{ ...walkStyles.card(false), padding: '16px 18px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{
@@ -42,8 +46,6 @@ function OffboardWalk1() {
               </div>
             </div>
           </div>
-
-          {/* Timeline metric strip (4-up) */}
           <div style={{
             marginTop: 12, padding: 10,
             background: WALK.creamSoft, borderRadius: 10,
@@ -71,7 +73,7 @@ function OffboardWalk1() {
           </div>
         </div>
 
-        {/* Reason quote card */}
+        {/* Reason quote */}
         <div style={{ ...walkStyles.card(false), padding: '14px 18px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
             <h3 style={{ ...walkStyles.h3Display, fontSize: 14, margin: 0 }}>เหตุผลที่ลาออก</h3>
@@ -86,7 +88,7 @@ function OffboardWalk1() {
           </div>
         </div>
 
-        {/* Decision two-card */}
+        {/* Decision */}
         <div style={{ ...walkStyles.card(false), padding: '14px 18px' }}>
           <h3 style={{ ...walkStyles.h3Display, fontSize: 14, margin: '0 0 10px' }}>การตัดสินใจของคุณ</h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -118,7 +120,7 @@ function OffboardWalk1() {
         </div>
       </div>
 
-      {/* RIGHT column · process timeline + replacement plan */}
+      {/* RIGHT timeline + replacement */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ ...walkStyles.card(true), padding: '14px 18px' }}>
           <div style={walkStyles.eyebrow}>กระบวนการ Offboarding</div>
@@ -139,8 +141,7 @@ function OffboardWalk1() {
                     background: bg, color: fg,
                     border: (s.st === 'done' || s.st === 'current') ? 0 : `1px solid ${WALK.hairline}`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontFamily: WALK.fontDisplay, fontSize: 10, fontWeight: 700,
-                    zIndex: 1,
+                    fontFamily: WALK.fontDisplay, fontSize: 10, fontWeight: 700, zIndex: 1,
                   }}>{s.st === 'done' ? '✓' : s.n}</div>
                   {i < arr.length - 1 && (
                     <div style={{
@@ -161,7 +162,6 @@ function OffboardWalk1() {
           })}
         </div>
 
-        {/* Replacement plan */}
         <div style={{ ...walkStyles.card(false), padding: '14px 18px' }}>
           <h3 style={{ ...walkStyles.h3Display, fontSize: 13, margin: '0 0 10px' }}>แผนทดแทน</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -179,55 +179,22 @@ function OffboardWalk1() {
       </div>
     </div>
   );
-
-  return (
-    <WalkFrame
-      stepIdx={1} totalSteps={4}
-      persona="Manager · คุณจงรักษ์"
-      title="อนุมัติลาออก · ข้อมูลครบใน 1 หน้า"
-      narrative="Resignation ไม่ใช่แค่ approve/reject — Manager ต้องรู้บริบท (tenure · เหตุผล · timeline) + เริ่มคิดแผนทดแทนทันที จัด layout เป็น 2 column ให้ตัดสินใจและวางแผนพร้อมกัน"
-      mockup={mockup}
-      callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 14,  y: WALK.BODY_TOP + 12,  w: 510, h: 70 },
-        { num: 2, x: WALK.MOCKUP_X + 14,  y: WALK.BODY_TOP + 156, w: 510, h: 86 },
-        { num: 3, x: WALK.MOCKUP_X + 280, y: WALK.BODY_TOP + 282, w: 244, h: 100 },
-        { num: 4, x: WALK.MOCKUP_X + 540, y: WALK.BODY_TOP + 12,  w: 326, h: 230 },
-      ]}
-      annotations={[
-        { num: 1, title: 'Employee header + tenure',
-          body: 'ชื่อไทย/อังกฤษ + role + branch + tenure 2 ปี 4 เดือน — บอก Manager ทันทีว่า "คนที่ลาออกคือใคร อยู่กับเรามานานแค่ไหน" ก่อนตัดสินใจ' },
-        { num: 2, title: 'Reason quote · ไม่ใช่ dropdown',
-          body: 'ใช้ italic blockquote + teal accent bar แทนแสดงเป็น tag เฉยๆ — ข้อความจริงของพนักงานสำคัญต่อ tone การตอบกลับ + การส่งต่อ HR' },
-        { num: 3, title: 'Approve เป็น default visual',
-          body: 'Card "อนุมัติ" pre-selected ด้วย teal solid; "ขอคุยก่อน" เป็น escape hatch (warning) — สื่อว่าระบบคาด approve เป็น primary path' },
-        { num: 4, title: 'Sticky process timeline',
-          body: 'แสดง 4 ขั้นตอน offboarding ตั้งแต่ frame นี้ — Manager เห็น handoff ไป HR ชัด ไม่รู้สึกว่า "ลาออก = หายไป"; ใช้ creamSoft แยกจาก action area' },
-      ]}
-    />
-  );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Frame 2 · Clearance — 4-category checklist
-// ═══════════════════════════════════════════════════════════════════
-function OffboardWalk2() {
-  // KPI strip data + first two categories of clearance items
+// ═════════════════════════════════════════════════════════════════════
+// ── Section 2 · Clearance KPI + tabs + 2 groups (frame 2 target) ──────
+// ═════════════════════════════════════════════════════════════════════
+function ClearanceSection() {
   const groups = [
-    {
-      cat: 'คืนของบริษัท',
-      items: [
-        { l: 'Laptop · Dell Latitude 5430', st: 'done',    who: 'IT' },
-        { l: 'บัตรพนักงาน + บัตรจอดรถ',     st: 'done',    who: 'Security' },
-        { l: 'เครื่องแบบ 3 ชุด + รองเท้า',  st: 'pending', who: 'Store Ops' },
-      ],
-    },
-    {
-      cat: 'เคลียร์ระบบ + บัญชี',
-      items: [
-        { l: 'ลบสิทธิ์ HRMS · Email · Slack', st: 'scheduled', who: 'IT' },
-        { l: 'ส่งต่อ task ใน workdesk',       st: 'todo',      who: 'Manager' },
-      ],
-    },
+    { cat: 'คืนของบริษัท', items: [
+      { l: 'Laptop · Dell Latitude 5430', st: 'done',    who: 'IT' },
+      { l: 'บัตรพนักงาน + บัตรจอดรถ',     st: 'done',    who: 'Security' },
+      { l: 'เครื่องแบบ 3 ชุด + รองเท้า',  st: 'pending', who: 'Store Ops' },
+    ]},
+    { cat: 'เคลียร์ระบบ + บัญชี', items: [
+      { l: 'ลบสิทธิ์ HRMS · Email · Slack', st: 'scheduled', who: 'IT' },
+      { l: 'ส่งต่อ task ใน workdesk',       st: 'todo',      who: 'Manager' },
+    ]},
   ];
   const ST = {
     done:      { l: 'เสร็จ',      bg: WALK.successSoft, fg: WALK.success, ic: '✓' },
@@ -236,9 +203,9 @@ function OffboardWalk2() {
     todo:      { l: 'ยังไม่ทำ',   bg: WALK.creamSoft,   fg: WALK.inkMuted, ic: '○' },
   };
 
-  const mockup = (
+  return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {/* KPI strip · 4-up */}
+      {/* KPI strip */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.3fr repeat(3, 1fr)', gap: 10 }}>
         <div style={{ ...walkStyles.card(false), padding: '12px 16px' }}>
           <div style={walkStyles.eyebrow}>ความคืบหน้ารวม</div>
@@ -348,38 +315,12 @@ function OffboardWalk2() {
       })}
     </div>
   );
-
-  return (
-    <WalkFrame
-      stepIdx={2} totalSteps={4}
-      persona="HR Admin · คุณนัฐญา"
-      title="Clearance · เปลี่ยน checklist เป็น workflow"
-      narrative="Offboarding มี 13 งานกระจาย 4 ทีม (IT · Security · Payroll · HR) — แสดง progress รวม + KPI urgency แล้วแยกตามหมวด พร้อม owner ทุกแถวเพื่อ accountability ชัด"
-      mockup={mockup}
-      callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 8,   y: WALK.BODY_TOP + 8,   w: 230, h: 78 },
-        { num: 2, x: WALK.MOCKUP_X + 470, y: WALK.BODY_TOP + 8,   w: 400, h: 78 },
-        { num: 3, x: WALK.MOCKUP_X + 8,   y: WALK.BODY_TOP + 100, w: 240, h: 36 },
-        { num: 4, x: WALK.MOCKUP_X + 560, y: WALK.BODY_TOP + 160, w: 220, h: 180 },
-      ]}
-      annotations={[
-        { num: 1, title: 'Progress bar · ไม่ใช่ %',
-          body: 'แสดงทั้ง 23% ตัวใหญ่ + bar + "3/13 งาน" — เลือกได้ว่าจะ scan visual หรืออ่านตัวเลข; HR Admin ต้อง report Manager ทุกวันต้องเห็นตัวเลขจริง' },
-        { num: 2, title: 'KPI urgency · danger สำหรับ time',
-          body: 'งานคงค้าง 9 = warning amber, วันที่เหลือ 5 = danger red — สีบอกระดับความเร่งด่วน ไม่ใช่แค่ตกแต่ง; เงินสุดท้าย ฿42,840 neutral เพราะเป็นข้อมูล' },
-        { num: 3, title: 'Tab + count badge',
-          body: 'ทุก tab ใส่ badge content (3/13 · ฿42,840 · 2 · ส่งแล้ว) — เห็นภาพรวมโดยไม่ต้องคลิกเข้าไป; lower friction สำหรับ HR Admin ที่ต้อง switch บ่อย' },
-        { num: 4, title: 'Owner chip ทุกแถว',
-          body: 'แต่ละ task ติด owner (IT · Security · Store Ops · Manager) เป็น cream chip — clearance ไม่ใช่ HR คนเดียวทำ; ต้องเห็นว่าใครต้องดันแต่ละชิ้น' },
-      ]}
-    />
-  );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Frame 3 · Final pay — termination payroll
-// ═══════════════════════════════════════════════════════════════════
-function OffboardWalk3() {
+// ═════════════════════════════════════════════════════════════════════
+// ── Section 3 · Final pay ledger (frame 3 target) ─────────────────────
+// ═════════════════════════════════════════════════════════════════════
+function FinalPaySection() {
   const rows = [
     { l: 'เงินเดือนงวด 1–15 พ.ค.',                       v:  12500, k: 'earn'   },
     { l: 'ค่าชดเชยวันลาคงเหลือ × 6 วัน',                  v:   5000, k: 'earn'   },
@@ -390,9 +331,9 @@ function OffboardWalk3() {
   ];
   const total = rows.reduce((s, r) => s + r.v, 0);
 
-  const mockup = (
+  return (
     <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 14 }}>
-      {/* LEFT · payroll breakdown */}
+      {/* LEFT · ledger */}
       <div style={{ ...walkStyles.card(false), padding: 0 }}>
         <div style={{ padding: '12px 18px', borderBottom: `1px solid ${WALK.hairlineSoft}` }}>
           <h3 style={{ ...walkStyles.h3Display, fontSize: 14, margin: 0 }}>รายการเงินสุดท้าย · 15 พ.ค. 2568</h3>
@@ -418,7 +359,6 @@ function OffboardWalk3() {
             </div>
           </div>
         ))}
-        {/* Total row in accent soft */}
         <div style={{
           padding: '12px 18px',
           background: WALK.accentSoft,
@@ -437,7 +377,7 @@ function OffboardWalk3() {
         </div>
       </div>
 
-      {/* RIGHT · destination account + docs + send button */}
+      {/* RIGHT · bank + docs + CTA */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ ...walkStyles.card(false), padding: '14px 18px' }}>
           <h3 style={{ ...walkStyles.h3Display, fontSize: 13, margin: 0 }}>บัญชีปลายทาง</h3>
@@ -480,41 +420,15 @@ function OffboardWalk3() {
       </div>
     </div>
   );
-
-  return (
-    <WalkFrame
-      stepIdx={3} totalSteps={4}
-      persona="HR Admin · คุณนัฐญา"
-      title="Final pay · ทุกบาทมีที่มา"
-      narrative="Final pay ของคนลาออกซับซ้อนกว่าเงินเดือนปกติ — มีค่าชดเชยลา + PF + tax true-up + หักประกันสังคม จัดเป็น line-item ledger ให้ตรวจสอบและ defend ต่อพนักงานได้"
-      mockup={mockup}
-      callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 10,  y: WALK.BODY_TOP + 64,  w: 500, h: 156 },
-        { num: 2, x: WALK.MOCKUP_X + 380, y: WALK.BODY_TOP + 158, w: 130, h: 62 },
-        { num: 3, x: WALK.MOCKUP_X + 10,  y: WALK.BODY_TOP + 220, w: 500, h: 56 },
-        { num: 4, x: WALK.MOCKUP_X + 530, y: WALK.BODY_TOP + 120, w: 340, h: 150 },
-      ]}
-      annotations={[
-        { num: 1, title: 'Earn lines แยกตามแหล่งที่มา',
-          body: 'แยก 4 รายการบวก (เงินเดือน · ค่าชดเชยลา · โบนัส · PF) แทนรวมเป็น "gross" — HR ต้องตอบพนักงานได้ทันทีว่า ฿18,840 มาจากอะไร' },
-        { num: 2, title: 'Deduction · ใช้ red minus',
-          body: 'ภงด.91 + ประกันสังคม แสดงเป็น "-฿1,200" สี danger — ขั้ว visual ตรงกับขั้ว math; ไม่ใช้ column แยก เพื่อให้ลำดับ chronological' },
-        { num: 3, title: 'Total ใน accent strip',
-          body: 'แถวรวม ฿42,840 อยู่ใน teal-soft background ตัดจาก rows ข้างบน — เป็น "หมุดสำคัญ" ที่ scan เห็นทันที; pattern เดียวกับ payslip ปกติ' },
-        { num: 4, title: 'Right rail = หลังจ่ายแล้วทำอะไรต่อ',
-          body: 'บัญชีปลายทาง + 3 เอกสาร (ภงด.91 · สปส.6-09 · กสล.) + ปุ่มส่ง Payroll — ผูก action chain ให้ HR Admin ไม่หลุดขั้นตอนกฎหมาย' },
-      ]}
-    />
-  );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Frame 4 · ปิด record — exit summary + reference + farewell
-// ═══════════════════════════════════════════════════════════════════
-function OffboardWalk4() {
-  const mockup = (
+// ═════════════════════════════════════════════════════════════════════
+// ── Section 4 · Exit summary + letters + farewell (frame 4 target) ────
+// ═════════════════════════════════════════════════════════════════════
+function ExitSummarySection() {
+  return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {/* Hero summary banner */}
+      {/* Dark hero */}
       <div style={{ ...walkStyles.cardDark, padding: '16px 20px', minHeight: 110 }}>
         <div style={{
           position: 'absolute', width: 110, height: 130, right: -20, bottom: -30,
@@ -547,14 +461,13 @@ function OffboardWalk4() {
 
       {/* Two columns · letters + farewell post */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-        {/* Letters card */}
         <div style={{ ...walkStyles.card(false), padding: '14px 18px' }}>
           <h3 style={{ ...walkStyles.h3Display, fontSize: 13, margin: '0 0 10px' }}>เอกสาร · จดหมาย</h3>
           {[
-            { t: 'หนังสือรับรองการทำงาน (TH)', st: 'sent', date: 'ส่งแล้ว 15 พ.ค.' },
-            { t: 'Certificate of Employment (EN)', st: 'sent', date: 'ส่งแล้ว 15 พ.ค.' },
-            { t: 'หนังสือรับรองเงินเดือนสุดท้าย', st: 'sent', date: 'ส่งแล้ว 15 พ.ค.' },
-            { t: 'จดหมายขอบคุณจากผู้บริหาร', st: 'sent', date: 'ส่งแล้ว 14 พ.ค.' },
+            { t: 'หนังสือรับรองการทำงาน (TH)', date: 'ส่งแล้ว 15 พ.ค.' },
+            { t: 'Certificate of Employment (EN)', date: 'ส่งแล้ว 15 พ.ค.' },
+            { t: 'หนังสือรับรองเงินเดือนสุดท้าย', date: 'ส่งแล้ว 15 พ.ค.' },
+            { t: 'จดหมายขอบคุณจากผู้บริหาร', date: 'ส่งแล้ว 14 พ.ค.' },
           ].map((L, i) => (
             <div key={L.t} style={{
               display: 'flex', alignItems: 'center', gap: 10,
@@ -579,11 +492,9 @@ function OffboardWalk4() {
           ))}
         </div>
 
-        {/* Farewell post / feed item */}
         <div style={{ ...walkStyles.card(true), padding: '14px 18px' }}>
           <div style={walkStyles.eyebrow}>โพสต์อำลา · Team feed</div>
           <h3 style={{ ...walkStyles.h3Display, fontSize: 13, margin: '4px 0 10px' }}>ขอบคุณเบน 🙏</h3>
-
           <article style={{
             padding: 12, background: WALK.surface, borderRadius: 10,
             border: `1px solid ${WALK.hairlineSoft}`,
@@ -609,7 +520,6 @@ function OffboardWalk4() {
             </div>
           </article>
 
-          {/* Boomerang / alumni hint */}
           <div style={{
             marginTop: 12, padding: '8px 12px',
             background: WALK.surface, border: `1px dashed ${WALK.accent}`,
@@ -624,29 +534,171 @@ function OffboardWalk4() {
       </div>
     </div>
   );
+}
 
+// ── Shared full-page mockup ───────────────────────────────────────────
+function offboardPageMockup() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      <ManagerApprovalSection/>
+      <ClearanceSection/>
+      <FinalPaySection/>
+      <ExitSummarySection/>
+    </div>
+  );
+}
+
+// ── Regions (frame-space) ─────────────────────────────────────────────
+const SPOTX = WALK.MOCKUP_X - 4;
+const SPOTW = WALK.MOCKUP_W + 8;
+const REGIONS = {
+  approval:  { y: WALK.BODY_TOP - 4,    h: 348 },  // manager approval section
+  clearance: { y: WALK.BODY_TOP + 362,  h: 504 },  // KPI + tabs + 2 lists
+  finalPay:  { y: WALK.BODY_TOP + 880,  h: 388 },  // ledger + bank + docs + CTA
+  exit:      { y: WALK.BODY_TOP + 1286, h: 366 },  // dark hero + letters + farewell
+};
+const OFFBOARD_FRAME_H = 1820;
+const COMMON = {
+  totalSteps: 4,
+  persona: 'Manager · HR Admin',
+  frameHeight: OFFBOARD_FRAME_H,
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// Frame 1 · อนุมัติลาออก — Manager approval
+// ═══════════════════════════════════════════════════════════════════
+function OffboardWalk1() {
   return (
     <WalkFrame
-      stepIdx={4} totalSteps={4}
+      {...COMMON}
+      stepIdx={1}
+      persona="Manager · คุณจงรักษ์"
+      title="อนุมัติลาออก · ข้อมูลครบใน 1 หน้า"
+      narrative="Resignation ไม่ใช่แค่ approve/reject — Manager ต้องรู้บริบท (tenure · เหตุผล · timeline) + เริ่มคิดแผนทดแทนทันที. จัด 2 column ให้ตัดสินใจและวางแผนพร้อมกัน"
+      mockup={offboardPageMockup()}
+      dim
+      callouts={[
+        { num: 1, x: SPOTX, y: REGIONS.approval.y,        w: 520, h: 88,  color: WALK.accent },
+        { num: 2, x: SPOTX, y: REGIONS.approval.y + 142,  w: 520, h: 78,  color: WALK.coral },
+        { num: 3, x: WALK.MOCKUP_X + 540, y: REGIONS.approval.y, w: 340, h: 340, color: WALK.butter },
+      ]}
+      annotations={[
+        { num: 1, title: 'Employee header + tenure metric strip',
+          body: 'ทำไม tenure อยู่ใน metric strip ไม่ใช่ใต้ชื่อ? เพราะ tenure เป็นข้อมูลตัดสินใจ — 2 ปี 4 เดือนต่างกันมากจาก 2 เดือน. ใส่ใน 4-up metric grid (ส่งคำขอ · วันสุดท้าย · แจ้งล่วงหน้า · วันลาเหลือ) ที่ Manager scan ได้ในแถวเดียว. "วันสุดท้าย" ใช้ accent เน้นเพราะเป็น anchor วันที่ทั้ง workflow ผูกกับเลขนี้.',
+          color: WALK.accent },
+        { num: 2, title: 'Reason quote · italic + teal bar ไม่ใช่ tag',
+          body: 'ทำไมไม่แสดงเป็น dropdown tag ("Career growth")? เพราะข้อความจริงของพนักงานสำคัญต่อ tone การตอบกลับ + การส่งต่อ HR. category tag อยู่ขวาบนเพื่อ classify; quote ใน italic + creamSoft + borderLeft teal เน้นว่านี่คือ "เสียงพนักงาน" ไม่ใช่ system label.',
+          color: WALK.coral },
+        { num: 3, title: 'Sticky timeline + แผนทดแทน คู่กัน',
+          body: 'ทำไม timeline อยู่ตั้งแต่ frame นี้แทนที่จะรอ HR? เพราะ Manager จะกล้า approve กว่าเมื่อเห็น handoff path ชัด — "ลาออก ≠ หายไป". cream variant แยกจาก action area. "แผนทดแทน" 2 ปุ่ม (Job Req + โอนย้ายภายใน) ให้ Manager เริ่ม think replacement ตั้งแต่กดอนุมัติ — ไม่ต้องรอ 30 วัน.',
+          color: WALK.butter },
+      ]}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Frame 2 · Clearance — 4-category checklist
+// ═══════════════════════════════════════════════════════════════════
+function OffboardWalk2() {
+  return (
+    <WalkFrame
+      {...COMMON}
+      stepIdx={2}
+      persona="HR Admin · คุณนัฐญา"
+      title="Clearance · เปลี่ยน checklist เป็น workflow"
+      narrative="Offboarding มี 13 งานกระจาย 4 ทีม (IT · Security · Payroll · HR) — แสดง progress รวม + KPI urgency แล้วแยกตามหมวด พร้อม owner ทุกแถวเพื่อ accountability ชัด"
+      mockup={offboardPageMockup()}
+      dim
+      callouts={[
+        { num: 1, x: SPOTX, y: REGIONS.clearance.y,        w: SPOTW, h: 84,  color: WALK.accent },
+        { num: 2, x: WALK.MOCKUP_X + 470, y: REGIONS.clearance.y, w: 400, h: 84, color: WALK.danger },
+        { num: 3, x: SPOTX, y: REGIONS.clearance.y + 100,  w: SPOTW, h: 38,  color: WALK.coral },
+        { num: 4, x: SPOTX, y: REGIONS.clearance.y + 160,  w: SPOTW, h: 340, color: WALK.sage },
+      ]}
+      annotations={[
+        { num: 1, title: 'Progress big-number + bar + count',
+          body: 'ทำไมไม่แค่ % หรือแค่ bar? เพราะ HR Admin ต้อง report Manager ทุกวันต้องการตัวเลขจริง ("3/13"), ขณะที่ visual bar ให้สแกนความคืบหน้าได้ทันที. รวมทั้ง 2 ใน tile เดียว = ไม่ต้องเลือก mode ระหว่าง visual กับ exact number.',
+          color: WALK.accent },
+        { num: 2, title: 'KPI urgency · danger เฉพาะเวลา',
+          body: 'ทำไมงานคงค้าง = warning amber แต่วันที่เหลือ = danger red? เพราะ "งาน" แก้ได้ (รับคน · เร่ง task), แต่ "วันที่เหลือ" เป็น hard deadline แก้ไม่ได้. สี = ระดับ recoverability, ไม่ใช่แค่ตกแต่ง. เงินสุดท้าย neutral เพราะเป็น info ไม่ใช่ alert.',
+          color: WALK.danger },
+        { num: 3, title: 'Tab + content preview badge',
+          body: 'ทำไม tab ต้องมี badge content? เพราะ HR Admin switch tab บ่อย — badge ("3/13 · ฿42,840 · 2 · ส่งแล้ว") preview state ก่อนคลิก ลด blind navigation. badge บนสุดของแต่ละ tab = "อะไรอยู่ในนี้", ไม่ใช่แค่ "เปิด/ปิด".',
+          color: WALK.coral },
+        { num: 4, title: 'Owner chip ทุกแถว · ไม่ใช่ HR คนเดียวทำ',
+          body: 'ทำไมต้องโชว์ owner inline? เพราะ clearance ไม่ใช่ HR ทำทุกอย่าง — IT · Security · Store Ops · Manager แต่ละทีมรับผิดชอบ task ที่ skill match. owner chip cream เป็น quick reference; HR scan ดูว่า task ค้างอยู่ทีมไหน → ตามทีมตรง ไม่ต้องตามเอง.',
+          color: WALK.sage },
+      ]}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Frame 3 · Final pay — termination payroll
+// ═══════════════════════════════════════════════════════════════════
+function OffboardWalk3() {
+  return (
+    <WalkFrame
+      {...COMMON}
+      stepIdx={3}
+      persona="HR Admin · คุณนัฐญา"
+      title="Final pay · ทุกบาทมีที่มา"
+      narrative="Final pay ของคนลาออกซับซ้อนกว่าเงินเดือนปกติ — มีค่าชดเชยลา + PF + tax true-up + หักประกันสังคม. จัดเป็น line-item ledger ให้ตรวจสอบและ defend ต่อพนักงานได้"
+      mockup={offboardPageMockup()}
+      dim
+      callouts={[
+        { num: 1, x: SPOTX, y: REGIONS.finalPay.y + 64,   w: 510, h: 156, color: WALK.accent },
+        { num: 2, x: WALK.MOCKUP_X + 380, y: REGIONS.finalPay.y + 158, w: 130, h: 62, color: WALK.danger },
+        { num: 3, x: SPOTX, y: REGIONS.finalPay.y + 226,  w: 510, h: 56,  color: WALK.success },
+        { num: 4, x: WALK.MOCKUP_X + 530, y: REGIONS.finalPay.y + 120,  w: 340, h: 240, color: WALK.butter },
+      ]}
+      annotations={[
+        { num: 1, title: 'Earn lines แยก 4 แหล่งที่มา',
+          body: 'ทำไมไม่รวมเป็น "gross"? เพราะถ้าพนักงานถามว่า "฿18,840 มาจากไหน" Admin ต้องตอบทันที. แยก 4 รายการ (เงินเดือน · ค่าชดเชยลา · โบนัส pro-rated · PF) ตามแหล่งกฎหมาย — ไม่ใช่แค่ผลรวม. label ระบุ basis ("× 6 วัน", "Q2", "พนักงาน + บริษัท") = self-documenting.',
+          color: WALK.accent },
+        { num: 2, title: 'Deduction = red minus · ไม่แยก column',
+          body: 'ทำไมไม่ใช้ 2-column table (earn | deduct)? เพราะ chronological order สำคัญ — earn สูง → deduct ต่ำเป็นลำดับ math ที่อ่านง่าย. "-฿1,200" สี danger ใช้ขั้ว visual ตรงกับขั้ว math; - sign ซ้ำกับ red color = redundant แต่จงใจกัน color-blind miss.',
+          color: WALK.danger },
+        { num: 3, title: 'Total ใน accent strip · payslip pattern',
+          body: 'ทำไม total ไม่ bold ที่ row สุดท้าย? เพราะ "หมุดสำคัญ" ต้องมี visual weight ต่างจาก rows. teal-soft bg + font size 20 (vs 14 ใน rows) = scan แล้วเจอทันที. pattern เดียวกับ payslip ปกติของ Humi — consistency ข้าม module ทำให้พนักงานเดาได้ว่า "เลขสำคัญอยู่ตรงนี้".',
+          color: WALK.success },
+        { num: 4, title: 'Right rail = "หลังจ่ายแล้วทำอะไรต่อ"',
+          body: 'ทำไม bank + docs + CTA อยู่ใน column ขวา? เพราะเป็น sequence ที่ผูกกัน — เห็น bank ก่อนกด send. 3 เอกสาร (ภงด.91 · สปส.6-09 · กสล.) เป็น compliance requirement ตามกฎหมายแรงงาน — แต่ละ deadline ระบุ inline ไม่ซ่อนใน docs. ปุ่ม "ส่งให้ Payroll" ใหญ่ล่างสุดเป็น final step ของ sequence.',
+          color: WALK.butter },
+      ]}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Frame 4 · ปิด record — exit summary + reference + farewell
+// ═══════════════════════════════════════════════════════════════════
+function OffboardWalk4() {
+  return (
+    <WalkFrame
+      {...COMMON}
+      stepIdx={4}
       persona="HR Admin · คุณนัฐญา"
       title="ปิด record · จบแบบไม่ตัดขาด"
       narrative="วันสุดท้ายไม่ใช่จุดจบ — HR Admin ต้องการ summary ว่าทุกอย่างปิดครบ + ระบบช่วย humanise การจากไป (จดหมาย · post อำลา · alumni track) เพื่อรักษา relationship สำหรับ boomerang hire"
-      mockup={mockup}
+      mockup={offboardPageMockup()}
+      dim
       callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 8,   y: WALK.BODY_TOP + 8,   w: 862, h: 130 },
-        { num: 2, x: WALK.MOCKUP_X + 220, y: WALK.BODY_TOP + 76,  w: 480, h: 50 },
-        { num: 3, x: WALK.MOCKUP_X + 8,   y: WALK.BODY_TOP + 150, w: 425, h: 200 },
-        { num: 4, x: WALK.MOCKUP_X + 447, y: WALK.BODY_TOP + 280, w: 423, h: 64 },
+        { num: 1, x: SPOTX, y: REGIONS.exit.y,        w: SPOTW, h: 128, color: WALK.ink },
+        { num: 2, x: SPOTX, y: REGIONS.exit.y + 142,  w: 425, h: 200, color: WALK.success },
+        { num: 3, x: WALK.MOCKUP_X + 447, y: REGIONS.exit.y + 280, w: 423, h: 76, color: WALK.coral },
       ]}
       annotations={[
-        { num: 1, title: 'Dark hero = ปิดเคสสำเร็จ',
-          body: 'Banner ink dark + teal accent = สถานะ "complete" — เปลี่ยน mood จาก operational (frames 2-3) เป็น ceremonial; ยืนยันให้ HR Admin รู้ว่าจบ' },
-        { num: 2, title: 'Summary 3 metric แทน 13-line audit',
-          body: 'Clearance 13/13 · Final pay โอน · Interview ตอบครบ — สรุปผลของ 3 frames ก่อนหน้าใน 1 บรรทัด; lower cognitive load หลังเสร็จงาน' },
-        { num: 3, title: 'จดหมาย 4 ฉบับ · all green',
-          body: 'เอกสารทั้ง 4 ฉบับ status "ส่งแล้ว" success green — visual proof ว่า HR ปฏิบัติตามกฎหมาย + ส่งเอกสารส่วนตัวให้พนักงานครบแล้ว' },
-        { num: 4, title: 'Alumni network · dashed hint',
-          body: 'Dashed teal border สื่อ "ทางเลือก" (ไม่ใช่ required) — รักษาสะพานสำหรับ boomerang hire ตามหลัก Humi warm; แยก visual จาก farewell post' },
+        { num: 1, title: 'Dark hero · ceremonial closing',
+          body: 'ทำไม dark ink พื้นหลัง? เพราะเปลี่ยน mood จาก operational (frames 2-3 ขาว/cream) เป็น ceremonial. dark = "complete + ปิด record". 3 summary metric (Clearance 13/13 · Final pay โอนแล้ว · Interview 6/6) สรุปผลของ 3 frames ก่อนหน้าใน 1 บรรทัด — lower cognitive load หลังเสร็จงาน.',
+          color: WALK.ink },
+        { num: 2, title: 'จดหมาย 4 ฉบับ · all green ✓',
+          body: 'ทำไมต้องโชว์เอกสาร list หลังจ่ายเงินแล้ว? เพราะกฎหมายแรงงาน + compliance — HR ต้องพิสูจน์ได้ว่าส่งครบ. ทั้ง 4 ฉบับ (รับรองงาน TH/EN · เงินเดือนสุดท้าย · ขอบคุณจากผู้บริหาร) เป็นชุดมาตรฐาน. status pill success green ทุกอัน = visual audit trail พร้อมโดน inspect.',
+          color: WALK.success },
+        { num: 3, title: 'Alumni network · dashed = optional bridge',
+          body: 'ทำไม dashed border ไม่ใช่ solid? เพราะ Alumni ไม่ใช่ required output ของ workflow — เป็น "ทางเลือก" ที่ Humi warm philosophy เปิดไว้สำหรับ boomerang hire. ใช้ teal dashed สื่อ "เปิดประตูไว้" แทน solid ที่จะดูเป็น mandatory step. แยก visual จาก farewell post solid ด้านบน.',
+          color: WALK.coral },
       ]}
     />
   );

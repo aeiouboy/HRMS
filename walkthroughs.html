@@ -179,13 +179,35 @@ function App() {
               { name: 'WorkforceWalk4', label: 'ส่งมอบของ · asset KPI + assignment',     h: 800 },
             ]}/>
 
-      <Sect id="walk-payroll" emoji="💰" title="Payroll · เงินเดือน"
-            persona="Employee · Manager · HR Admin · HRIS · SPD"
+      <Sect id="walk-payroll-emp"     emoji="💰" title="Payroll · Employee slip"
+            persona="Employee"
             comps={[
-              { name: 'PayrollWalk1', label: 'Employee payslip · gross/deductions/net' },
-              { name: 'PayrollWalk2', label: 'Manager review · team + OT/bonus' },
-              { name: 'PayrollWalk3', label: 'Admin payroll run · variance ±15%' },
-              { name: 'PayrollWalk4', label: 'HRIS + SPD · tax formula + reconcile' },
+              { name: 'PayrollWalkEmp1', label: 'Employee payslip · gross/deductions/net + YTD', h: 680 },
+            ]}/>
+
+      <Sect id="walk-payroll-manager" emoji="💰" title="Payroll · Manager review"
+            persona="Manager"
+            comps={[
+              { name: 'PayrollWalkManager1', label: 'Manager review · team OT/bonus + deadline', h: 640 },
+            ]}/>
+
+      <Sect id="walk-payroll-admin"   emoji="💰" title="Payroll · Admin run + variance"
+            persona="HR Admin"
+            comps={[
+              { name: 'PayrollWalkAdmin1', label: 'Admin run · pipeline 6 ขั้น + variance ±15%', h: 560 },
+              { name: 'PayrollWalkAdmin2', label: 'Admin publish · bank batch checksum',          h: 560 },
+            ]}/>
+
+      <Sect id="walk-payroll-hris"    emoji="💰" title="Payroll · HRIS tax config"
+            persona="HRIS"
+            comps={[
+              { name: 'PayrollWalkHris1', label: 'HRIS formula registry + ภงด.1 bracket', h: 530 },
+            ]}/>
+
+      <Sect id="walk-payroll-spd"     emoji="💰" title="Payroll · SPD reconcile"
+            persona="SPD"
+            comps={[
+              { name: 'PayrollWalkSpd1', label: 'SPD dispute · TM vs Payroll diff + resolution', h: 560 },
             ]}/>
 
       <Sect id="walk-benefit-emp"     emoji="🏥" title="Benefit · Employee wallets"

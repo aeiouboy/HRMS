@@ -1,52 +1,58 @@
 // walkthrough-probation.jsx
 // Probation module Design Walkthrough (Manager + HR Admin personas).
-// 4 frames following the manager's evaluation arc:
-//   01 คัดกรอง       — Inbox triage: 4-tier urgency filter + bulk-select
-//   02 เร่งด่วน       — Urgency cue: red countdown banner + tier colour coding
-//   03 ประเมิน        — Detail assessment: snapshot + outcome + rating + notes
-//   04 ปลายทาง       — Conditional outcome: Extend/Pass/No-pass branching fields
 //
-// Mockups are inline-style replicas of prod-probation.jsx (kept inline so
-// this overview is robust against changes in the live mockup file).
+// RETROFIT PATTERN (static page + rotating spotlight):
+//   probationPageMockup() renders the entire ProbationApprove page in
+//   one shot — tier filter strip + bulk action bar + inbox list +
+//   urgency banner + employee snapshot + outcome selector + rating/notes
+//   + conditional branch grid. The same page is reused as the static
+//   background of every frame; the spotlight rotates between regions.
+//
+// Frames (the manager's evaluation arc):
+//   01 คัดกรอง       — Inbox triage: 4-tier filter + bulk-select bar
+//   02 เร่งด่วน       — Urgency cue: countdown banner + tier colour ramp
+//   03 ประเมิน        — Detail assessment: snapshot → outcome → rating
+//   04 ปลายทาง       — Conditional outcome: Extend/Pass/No-pass branches
 
 const { WALK, WalkFrame, WalkAvatar, WalkTag, walkStyles } = window;
 
-// ═══════════════════════════════════════════════════════════════════
-// Frame 1 · คัดกรอง — Inbox triage (4-tier filter + bulk select)
-// ═══════════════════════════════════════════════════════════════════
-function ProbationWalk1() {
+// ── Row 1 · Tier filter cards ─────────────────────────────────────────
+function RowTierFilter() {
   const tiers = [
-    { l: 'ทั้งหมด',       v: 4, sub: 'ในความดูแล',          tone: WALK.inkMuted, active: false },
-    { l: 'เร่งด่วน',       v: 1, sub: '≤ 14 วัน',             tone: WALK.danger,   active: true  },
-    { l: 'ใกล้ครบ',        v: 1, sub: '15–29 วัน',            tone: '#92400E',     active: false },
-    { l: 'ทดลองปกติ',     v: 2, sub: '≥ 30 วัน',             tone: '#2F5840',     active: false },
+    { l: 'ทั้งหมด',    v: 4, sub: 'ในความดูแล', tone: WALK.inkMuted, active: false },
+    { l: 'เร่งด่วน',    v: 1, sub: '≤ 14 วัน',    tone: WALK.danger,   active: true  },
+    { l: 'ใกล้ครบ',    v: 1, sub: '15–29 วัน',   tone: '#92400E',     active: false },
+    { l: 'ทดลองปกติ', v: 2, sub: '≥ 30 วัน',     tone: '#2F5840',     active: false },
   ];
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+      {tiers.map(t => (
+        <div key={t.l} style={{
+          background: t.active ? WALK.creamSoft : WALK.surface,
+          border: `1px solid ${t.active ? WALK.ink : WALK.hairline}`,
+          borderRadius: 12, padding: '12px 14px',
+        }}>
+          <div style={{ ...walkStyles.eyebrow, color: t.tone }}>{t.l}</div>
+          <div style={{
+            fontFamily: WALK.fontDisplay,
+            fontSize: 26, fontWeight: 700, letterSpacing: '-0.02em',
+            color: WALK.ink, marginTop: 2, lineHeight: 1,
+          }}>{t.v}</div>
+          <div style={{ fontSize: 11, color: WALK.inkMuted, marginTop: 3 }}>{t.sub}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Row 2 · Bulk-action bar + inbox list ──────────────────────────────
+function RowInboxList() {
   const rows = [
-    { i: 'PT', c: WALK.accent, n: 'ปริยา ตันธีรพล',  pos: 'ผู้ช่วยร้าน · ทองหล่อ',     d: 10, tag: 'urgent' },
-    { i: 'NS', c: WALK.butter, n: 'นพดล สุขสวัสดิ์',  pos: 'บาริสต้า · เอกมัย',         d: 17, tag: 'warn'   },
+    { i: 'PT', c: WALK.accent, n: 'ปริยา ตันธีรพล',  pos: 'ผู้ช่วยร้าน · ทองหล่อ', d: 10, tag: 'urgent' },
+    { i: 'NS', c: WALK.butter, n: 'นพดล สุขสวัสดิ์',  pos: 'บาริสต้า · เอกมัย',     d: 17, tag: 'warn'   },
   ];
-
-  const mockup = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {/* Tier summary cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
-        {tiers.map(t => (
-          <div key={t.l} style={{
-            background: t.active ? WALK.creamSoft : WALK.surface,
-            border: `1px solid ${t.active ? WALK.ink : WALK.hairline}`,
-            borderRadius: 12, padding: '12px 14px',
-          }}>
-            <div style={{ ...walkStyles.eyebrow, color: t.tone }}>{t.l}</div>
-            <div style={{
-              fontFamily: WALK.fontDisplay,
-              fontSize: 26, fontWeight: 700, letterSpacing: '-0.02em',
-              color: WALK.ink, marginTop: 2, lineHeight: 1,
-            }}>{t.v}</div>
-            <div style={{ fontSize: 11, color: WALK.inkMuted, marginTop: 3 }}>{t.sub}</div>
-          </div>
-        ))}
-      </div>
-
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {/* Bulk action bar */}
       <div style={{
         background: WALK.ink, color: '#E7E3D8',
@@ -133,207 +139,86 @@ function ProbationWalk1() {
       </div>
     </div>
   );
+}
 
+// ── Row 3 · Urgency countdown banner ──────────────────────────────────
+function RowUrgencyBanner() {
   return (
-    <WalkFrame
-      stepIdx={1} totalSteps={4}
-      persona="Manager · คุณจงรักษ์"
-      title="คัดกรอง · 4-tier urgency เพื่อแยกเคสด่วนทันที"
-      narrative="Manager ดูแลเคสทดลองงานหลายคนพร้อมกัน — Inbox ต้องบอกได้ทันทีว่า 'ใครรอด่วน' โดยไม่ต้องไล่อ่านทุกแถว ใช้ tier filter 4 ระดับ + count badge + bulk-select เพื่อ batch อนุมัติเคสปกติได้ในคลิกเดียว"
-      mockup={mockup}
-      callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 8,   y: WALK.BODY_TOP - 4,  w: 864, h: 78  },
-        { num: 2, x: WALK.MOCKUP_X + 230, y: WALK.BODY_TOP - 4,  w: 210, h: 78, color: WALK.danger },
-        { num: 3, x: WALK.MOCKUP_X + 8,   y: WALK.BODY_TOP + 86, w: 864, h: 44, color: WALK.ink },
-        { num: 4, x: WALK.MOCKUP_X + 8,   y: WALK.BODY_TOP + 142, w: 864, h: 156 },
-      ]}
-      annotations={[
-        { num: 1, title: '4-tier filter พร้อม count',
-          body: 'ทั้งหมด · เร่งด่วน · ใกล้ครบ · ทดลองปกติ — แต่ละ tier ตอบ "เหลือกี่วัน" ในตัวเลขใหญ่ + sub-label วันคงเหลือ scan ได้ใน 1 วินาทีก่อนเลือก filter' },
-        { num: 2, title: 'Active tier = ink border + cream bg',
-          body: 'ใช้ ink dark border (ไม่ใช่ accent fill) เพื่อ neutral ไม่กลบสี tier เอง · creamSoft bg แยก state จาก inactive surface white — pattern ใช้ซ้ำทุก filter tab',
-          color: WALK.danger },
-        { num: 3, title: 'Bulk bar สีดำลอยเหนือ list',
-          body: 'ปรากฏเมื่อ checkbox ถูกเลือก ≥1 รายการ — ink solid + white text เพื่อ contrast สูง · "อนุมัติทั้งหมด (Pass)" เป็น primary action สำหรับเคสที่ผ่านชัวร์ ไม่ต้องเปิดทีละเคส',
-          color: WALK.ink },
-        { num: 4, title: 'Tag เร่งด่วน vs ใกล้ครบ',
-          body: 'แถวเดียวบอกครบ: avatar · ชื่อ · ตำแหน่ง · วันคงเหลือ · tag · เร่งด่วน = danger soft (red), ใกล้ครบ = butter soft (yellow) — ตา manager จับ urgency ทันทีโดยไม่ต้องอ่านตัวเลข' },
-      ]}
-    />
+    <div style={{
+      background: WALK.dangerSoft,
+      border: `1.5px solid #EF4444`,
+      borderRadius: 12,
+      padding: '14px 18px',
+      color: WALK.danger,
+      display: 'flex', gap: 12, alignItems: 'center',
+    }}>
+      <div style={{
+        width: 32, height: 32, borderRadius: '50%',
+        background: '#fff',
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        color: WALK.danger, fontSize: 17, fontWeight: 700, flexShrink: 0,
+      }}>!</div>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 14, fontWeight: 600 }}>ปริยา ตันธีรพล · ใกล้ครบกำหนด — เหลือ 10 วัน</div>
+        <div style={{ fontSize: 12, marginTop: 2, color: '#9F1D1D' }}>
+          กรุณาบันทึกการประเมินก่อนวันที่ 24 พ.ค. 2569 · หลังจากนั้นระบบจะ auto-pass อัตโนมัติ
+        </div>
+      </div>
+      <span style={{
+        background: WALK.danger, color: '#fff',
+        padding: '6px 12px', borderRadius: 8,
+        fontSize: 12, fontWeight: 600,
+      }}>10 วัน</span>
+    </div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Frame 2 · เร่งด่วน — Countdown banner + tier colour coding
-// ═══════════════════════════════════════════════════════════════════
-function ProbationWalk2() {
-  const tierLegend = [
-    { l: 'เร่งด่วน',  d: '≤ 14 วัน',     bg: WALK.dangerSoft, fg: WALK.danger,  border: '#FECACA' },
-    { l: 'ใกล้ครบ',  d: '15–29 วัน',    bg: WALK.butterSoft, fg: '#92400E',     border: '#FCD34D' },
-    { l: 'ทดลองปกติ', d: '≥ 30 วัน',     bg: WALK.sageSoft,   fg: '#2F5840',     border: '#A8C5AD' },
-  ];
-
-  const mockup = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* Title row */}
-      <div>
-        <div style={walkStyles.eyebrow}>การดำเนินการ · PRB-2456</div>
-        <h1 style={{
-          fontFamily: WALK.fontDisplay,
-          fontSize: 22, fontWeight: 600, letterSpacing: '-0.015em',
-          margin: '4px 0 0', color: WALK.ink,
-        }}>ประเมินทดลองงาน · ปริยา ตันธีรพล</h1>
-      </div>
-
-      {/* Red countdown banner */}
-      <div style={{
-        background: WALK.dangerSoft,
-        border: `1.5px solid #EF4444`,
-        borderRadius: 12,
-        padding: '14px 18px',
-        color: WALK.danger,
-        display: 'flex', gap: 12, alignItems: 'center',
-      }}>
-        <div style={{
-          width: 32, height: 32, borderRadius: '50%',
-          background: '#fff',
-          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-          color: WALK.danger, fontSize: 17, fontWeight: 700, flexShrink: 0,
-        }}>!</div>
+// ── Row 4 · Employee snapshot ─────────────────────────────────────────
+function RowSnapshot() {
+  return (
+    <div style={{ ...walkStyles.card(true), padding: '16px 18px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+        <WalkAvatar initials="PT" color={WALK.accent} size={50}/>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 14, fontWeight: 600 }}>ใกล้ครบกำหนด — เหลือ 10 วัน</div>
-          <div style={{ fontSize: 12, marginTop: 2, color: '#9F1D1D' }}>
-            กรุณาบันทึกการประเมินก่อนวันที่ 24 พ.ค. 2569 · หลังจากนั้นระบบจะ auto-pass อัตโนมัติ
-          </div>
-        </div>
-        <span style={{
-          background: WALK.danger, color: '#fff',
-          padding: '6px 12px', borderRadius: 8,
-          fontSize: 12, fontWeight: 600,
-        }}>10 วัน</span>
-      </div>
-
-      {/* Tier legend — visual proof of three-step colour ramp */}
-      <div style={{ ...walkStyles.card(true) }}>
-        <div style={walkStyles.eyebrow}>ระดับเร่งด่วน · colour ramp</div>
-        <h3 style={{ ...walkStyles.h3Display, fontSize: 17, marginBottom: 14 }}>
-          วันคงเหลือ → สี ไม่ใช้ red/yellow/green ทั่วไป
-        </h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-          {tierLegend.map(t => (
-            <div key={t.l} style={{
-              background: t.bg, border: `1px solid ${t.border}`,
-              borderRadius: 12, padding: '14px 16px',
-            }}>
-              <div style={{
-                width: 36, height: 36, borderRadius: '50%',
-                background: t.fg, color: '#fff',
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 16, fontWeight: 700,
-              }}>{t.l === 'เร่งด่วน' ? '!' : t.l === 'ใกล้ครบ' ? '◐' : '✓'}</div>
-              <div style={{ marginTop: 10, fontSize: 13, fontWeight: 700, color: t.fg }}>{t.l}</div>
-              <div style={{ fontSize: 11.5, color: WALK.inkSoft, marginTop: 3 }}>{t.d}</div>
-            </div>
-          ))}
+          <div style={walkStyles.eyebrow}>EMP-02458</div>
+          <div style={{
+            fontFamily: WALK.fontDisplay,
+            fontSize: 18, fontWeight: 600, letterSpacing: '-0.015em',
+            color: WALK.ink, marginTop: 2,
+          }}>ปริยา ตันธีรพล</div>
+          <div style={{ fontSize: 12.5, color: WALK.inkMuted }}>Priya Tanthiraphon</div>
         </div>
       </div>
-
-      {/* Mini list demonstrating colour code in row context */}
-      <div style={{ ...walkStyles.card(false), padding: '12px 16px' }}>
-        <div style={{ ...walkStyles.eyebrow, marginBottom: 8 }}>ตัวอย่างในแถวคิว</div>
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12,
+        marginTop: 14, paddingTop: 12, borderTop: `1px solid ${WALK.hairlineSoft}`,
+      }}>
         {[
-          { n: 'ปริยา ต.',    d: '10 วัน', col: WALK.danger,  i: 'PT', c: WALK.accent },
-          { n: 'นพดล ส.',    d: '17 วัน', col: '#92400E',     i: 'NS', c: WALK.butter },
-          { n: 'กชกร พ.',   d: '41 วัน', col: '#2F5840',     i: 'KP', c: WALK.coral  },
-        ].map(r => (
-          <div key={r.n} style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            padding: '7px 0',
-          }}>
-            <WalkAvatar initials={r.i} color={r.c} size={26}/>
-            <span style={{ fontSize: 12.5, fontWeight: 600 }}>{r.n}</span>
-            <div style={{ flex: 1 }}/>
-            <span style={{ fontSize: 12.5, fontWeight: 700, color: r.col }}>{r.d}</span>
+          ['ตำแหน่ง', 'ผู้ช่วยร้าน · ทองหล่อ'],
+          ['วันเริ่มงาน', '15 ม.ค. 2569'],
+          ['อายุงาน', '3 เดือน 29 วัน'],
+          ['หัวหน้าโดยตรง', 'คุณจงรักษ์'],
+        ].map(([k, v]) => (
+          <div key={k}>
+            <div style={walkStyles.eyebrow}>{k}</div>
+            <div style={{ fontSize: 12.5, fontWeight: 600, marginTop: 3, color: WALK.ink }}>{v}</div>
           </div>
         ))}
       </div>
     </div>
   );
-
-  return (
-    <WalkFrame
-      stepIdx={2} totalSteps={4}
-      persona="Manager · คุณจงรักษ์"
-      title="เร่งด่วน · countdown banner + tier colour code"
-      narrative="ทดลองงานมี hard deadline ที่ถ้าพลาดจะ auto-pass — Manager ต้องเห็น urgency ก่อนเปิดเคส; banner สีแดงด้านบนตอบ 'เหลือกี่วัน' + 'ถ้าไม่ทำจะเกิดอะไร' ในกล่องเดียว ส่วน tier colour ramp ใช้สม่ำเสมอทุกหน้า"
-      mockup={mockup}
-      callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 8,   y: WALK.BODY_TOP + 64,  w: 864, h: 84,  color: WALK.danger },
-        { num: 2, x: WALK.MOCKUP_X + 730, y: WALK.BODY_TOP + 86,  w: 130, h: 38,  color: WALK.danger, radius: 10 },
-        { num: 3, x: WALK.MOCKUP_X + 8,   y: WALK.BODY_TOP + 158, w: 864, h: 162 },
-        { num: 4, x: WALK.MOCKUP_X + 8,   y: WALK.BODY_TOP + 330, w: 864, h: 132 },
-      ]}
-      annotations={[
-        { num: 1, title: 'Banner = danger soft + ink border',
-          body: 'แทนที่จะเอา red solid (น่ากลัวเกิน) ใช้ #FEE2E2 bg + #EF4444 border + #B91C1C text — สื่อ "ต้องทำ" แต่ไม่ alarming; ไอคอน "!" ใน white circle เพื่อ contrast',
-          color: WALK.danger },
-        { num: 2, title: 'Countdown pill ขวาสุด',
-          body: 'ตัวเลข "10 วัน" ในกล่อง red solid วางขวาสุด — eye stops here last (Z-pattern) ก่อนเริ่มอ่าน body; redundant กับ title แต่จงใจ เพื่อให้ scan แว้บก็เห็น',
-          color: WALK.danger },
-        { num: 3, title: '3 ระดับ ไม่ใช่ red/yellow/green',
-          body: 'เร่งด่วน = danger red, ใกล้ครบ = butter (warm yellow ไม่ใช่ #FFD700), ทดลองปกติ = sage (เขียวเทาอบอุ่น) — หลีกเลี่ยง traffic-light cliché ที่ผู้พิการสี่สา (deuteranopia) แยกยาก' },
-        { num: 4, title: 'Colour code ใช้ซ้ำใน row',
-          body: 'ตัวเลข "10/17/41 วัน" ในคิวใช้สีเดียวกับ tier badge — ไม่ต้องอ่าน label ก็รู้ว่าเคสไหนอยู่ tier ไหน · consistency = predictability' },
-      ]}
-    />
-  );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Frame 3 · ประเมิน — Detail assessment (snapshot + outcome + rating)
-// ═══════════════════════════════════════════════════════════════════
-function ProbationWalk3() {
+// ── Row 5 · Outcome selector + rating/notes ───────────────────────────
+function RowAssessment() {
   const outcomes = [
     { v: 'pass',    l: 'ผ่านทดลองงาน', s: 'บรรจุเป็น Permanent',     ic: '✓', c: WALK.accent,  sel: true  },
     { v: 'extend',  l: 'ขยายเวลา',      s: 'ทดลองต่อ 30–60 วัน',       ic: '⟳', c: WALK.warning, sel: false },
     { v: 'no_pass', l: 'ไม่ผ่าน',        s: 'สิ้นสภาพหลังบันทึก',         ic: '✕', c: WALK.danger,  sel: false },
   ];
 
-  const mockup = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {/* Employee snapshot — cream card */}
-      <div style={{ ...walkStyles.card(true), padding: '16px 18px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-          <WalkAvatar initials="PT" color={WALK.accent} size={50}/>
-          <div style={{ flex: 1 }}>
-            <div style={walkStyles.eyebrow}>EMP-02458</div>
-            <div style={{
-              fontFamily: WALK.fontDisplay,
-              fontSize: 18, fontWeight: 600, letterSpacing: '-0.015em',
-              color: WALK.ink, marginTop: 2,
-            }}>ปริยา ตันธีรพล</div>
-            <div style={{ fontSize: 12.5, color: WALK.inkMuted }}>Priya Tanthiraphon</div>
-          </div>
-        </div>
-        <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12,
-          marginTop: 14, paddingTop: 12, borderTop: `1px solid ${WALK.hairlineSoft}`,
-        }}>
-          {[
-            ['ตำแหน่ง', 'ผู้ช่วยร้าน · ทองหล่อ'],
-            ['วันเริ่มงาน', '15 ม.ค. 2569'],
-            ['อายุงาน', '3 เดือน 29 วัน'],
-            ['หัวหน้าโดยตรง', 'คุณจงรักษ์'],
-          ].map(([k, v]) => (
-            <div key={k}>
-              <div style={walkStyles.eyebrow}>{k}</div>
-              <div style={{ fontSize: 12.5, fontWeight: 600, marginTop: 3, color: WALK.ink }}>{v}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Outcome selector — 3 cards */}
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div style={{ ...walkStyles.card(false), padding: '14px 16px' }}>
         <div style={walkStyles.eyebrow}>ขั้นที่ 1 จาก 3</div>
         <h3 style={{ ...walkStyles.h3Display, fontSize: 16, margin: '4px 0 12px' }}>
@@ -376,8 +261,6 @@ function ProbationWalk3() {
         <h3 style={{ ...walkStyles.h3Display, fontSize: 16, margin: '4px 0 12px' }}>
           ผลการประเมินเชิงคุณภาพ
         </h3>
-
-        {/* Rating stars */}
         <div style={{ marginBottom: 12 }}>
           <div style={{
             fontSize: 11.5, color: WALK.inkSoft, fontWeight: 600,
@@ -394,7 +277,6 @@ function ProbationWalk3() {
           </div>
         </div>
 
-        {/* Notes */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {[
             { l: 'จุดเด่น',         v: 'ทำงานเร็ว ใส่ใจลูกค้า · ขายเข้าทีมได้ดี' },
@@ -416,74 +298,32 @@ function ProbationWalk3() {
       </div>
     </div>
   );
-
-  return (
-    <WalkFrame
-      stepIdx={3} totalSteps={4}
-      persona="Manager · คุณจงรักษ์"
-      title="ประเมิน · snapshot → outcome → quality"
-      narrative="หน้าเดียวจบ 3 ขั้น: ดูว่าใคร (snapshot) → ตัดสินอะไร (outcome) → อธิบายทำไม (rating + notes) ลำดับนี้ mirror ขั้นตอนความคิดของหัวหน้างาน ไม่บังคับให้ทำตามขั้นแบบ wizard"
-      mockup={mockup}
-      callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 8,   y: WALK.BODY_TOP - 4,   w: 864, h: 130 },
-        { num: 2, x: WALK.MOCKUP_X + 8,   y: WALK.BODY_TOP + 140, w: 864, h: 140 },
-        { num: 3, x: WALK.MOCKUP_X + 22,  y: WALK.BODY_TOP + 196, w: 280, h: 76, color: WALK.accent },
-        { num: 4, x: WALK.MOCKUP_X + 22,  y: WALK.BODY_TOP + 332, w: 380, h: 60, color: WALK.warning },
-      ]}
-      annotations={[
-        { num: 1, title: 'Snapshot บน cream — context first',
-          body: 'ก่อนตัดสินใจ Manager ต้องเห็น "ใคร" — avatar + ชื่อ + 4 facts (ตำแหน่ง · วันเริ่มงาน · อายุงาน · หัวหน้า) cream variant สื่อว่าเป็น context ไม่ใช่ input ที่ต้องแก้' },
-        { num: 2, title: 'Outcome 3 ตัวเลือก = radio card',
-          body: 'ไม่ใช่ dropdown (ซ่อนทางเลือก) ไม่ใช่ button (สื่อ "ทำเลย") — radio card บังคับเลือก 1 ใน 3 พร้อม sub-line อธิบาย consequence ก่อน commit' },
-        { num: 3, title: 'Selected = ink border + cream bg',
-          body: 'การ์ดที่เลือกใช้ outcome color เป็น border (teal/warning/danger) + creamSoft bg — sub-radio dot ก็เปลี่ยนสีตาม; ไม่ fill ทั้งใบเพราะจะกลบ icon และ label',
-          color: WALK.accent },
-        { num: 4, title: 'Star rating + qualitative note',
-          body: 'Star ★ ให้ 1-5 (4 = "เกินมาตรฐาน" inline label) + 2 textareas บังคับ (จุดเด่น/จุดพัฒนา) — quantitative + qualitative คู่กันเพื่อ HR review ได้ trail ครบ',
-          color: WALK.warning },
-      ]}
-    />
-  );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Frame 4 · ปลายทาง — Conditional outcome (Extend / Pass / No-pass)
-// ═══════════════════════════════════════════════════════════════════
-function ProbationWalk4() {
+// ── Row 6 · Conditional outcome branches (Extend/Pass/No-pass) ────────
+function RowBranches() {
   const branches = [
     {
-      head: 'Extend',
-      headTh: 'ขยายเวลา',
-      color: WALK.warning,
-      bg: '#FFFBEB',
-      border: '#FCD34D',
-      icon: '⟳',
+      head: 'Extend', headTh: 'ขยายเวลา',
+      color: WALK.warning, bg: '#FFFBEB', border: '#FCD34D', icon: '⟳',
       desc: 'ต้องระบุเส้นตายใหม่ + ระยะ',
       fields: [
-        { l: 'ขยายถึงวันที่',  v: '25 มิ.ย. 2569', hint: 'ต้องไม่เกิน +119 วัน', type: 'date' },
-        { l: 'ระยะเวลา',      v: '45 วัน',         hint: 'เลือกจาก 30/45/60',  type: 'select' },
+        { l: 'ขยายถึงวันที่', v: '25 มิ.ย. 2569', hint: 'ต้องไม่เกิน +119 วัน', type: 'date' },
+        { l: 'ระยะเวลา',     v: '45 วัน',         hint: 'เลือกจาก 30/45/60',  type: 'select' },
       ],
     },
     {
-      head: 'Pass',
-      headTh: 'ผ่านทดลองงาน',
-      color: WALK.accent,
-      bg: '#F0FBFA',
-      border: WALK.accent,
-      icon: '✓',
+      head: 'Pass', headTh: 'ผ่านทดลองงาน',
+      color: WALK.accent, bg: '#F0FBFA', border: WALK.accent, icon: '✓',
       desc: 'ต้องระบุวันบรรจุ + Allowance ส่ง Payroll',
       fields: [
         { l: 'วันที่บรรจุ (effective)', v: '15 พ.ค. 2569', hint: 'ส่ง EC + Payroll', type: 'date' },
-        { l: 'Allowance (ถ้ามี)',     v: '2,500 บาท',     hint: 'auto → Payroll',  type: 'number' },
+        { l: 'Allowance (ถ้ามี)',      v: '2,500 บาท',     hint: 'auto → Payroll',  type: 'number' },
       ],
     },
     {
-      head: 'No-pass',
-      headTh: 'ไม่ผ่าน',
-      color: WALK.danger,
-      bg: '#FEF2F2',
-      border: '#FECACA',
-      icon: '✕',
+      head: 'No-pass', headTh: 'ไม่ผ่าน',
+      color: WALK.danger, bg: '#FEF2F2', border: '#FECACA', icon: '✕',
       desc: 'ต้องระบุเหตุผล + วันที่สิ้นสภาพ',
       fields: [
         { l: 'เหตุผลการสิ้นสภาพ', v: 'ขาดทักษะ POS · เกิน 3 ครั้ง', hint: 'ส่งให้กฎหมายตรวจ', type: 'select' },
@@ -492,10 +332,10 @@ function ProbationWalk4() {
     },
   ];
 
-  const mockup = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div>
-        <div style={walkStyles.eyebrow}>ขั้นที่ 1 จาก 3 · สาขาตามผลการประเมิน</div>
+        <div style={walkStyles.eyebrow}>ขั้นที่ 3 จาก 3 · สาขาตามผลการประเมิน</div>
         <h3 style={{ ...walkStyles.h3Display, fontSize: 17, margin: '3px 0 0' }}>
           Conditional fields · ฟอร์มเปลี่ยนตาม outcome
         </h3>
@@ -507,7 +347,6 @@ function ProbationWalk4() {
           borderRadius: 12, padding: '12px 14px',
           display: 'flex', gap: 14, alignItems: 'stretch',
         }}>
-          {/* Branch tag */}
           <div style={{
             width: 110, flexShrink: 0,
             display: 'flex', flexDirection: 'column', gap: 4,
@@ -526,7 +365,6 @@ function ProbationWalk4() {
             <div style={{ fontSize: 10.5, color: WALK.inkMuted, lineHeight: 1.45 }}>{b.desc}</div>
           </div>
 
-          {/* Fields */}
           <div style={{
             flex: 1,
             display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10,
@@ -558,53 +396,174 @@ function ProbationWalk4() {
           </div>
         </div>
       ))}
-
-      {/* Footer CTA preview */}
-      <div style={{
-        marginTop: 4,
-        background: WALK.surface,
-        border: `1px solid ${WALK.hairline}`,
-        borderRadius: 10,
-        padding: '10px 14px',
-        display: 'flex', alignItems: 'center', gap: 10,
-      }}>
-        <span style={{ fontSize: 11.5, color: WALK.inkMuted }}>
-          บันทึกร่างอัตโนมัติ · 14:32 · กรอก 9 จาก 12 ช่อง
-        </span>
-        <div style={{ flex: 1 }}/>
-        <button style={{ ...walkStyles.btnGhost, padding: '5px 11px', fontSize: 12 }}>ยกเลิก</button>
-        <button style={{ ...walkStyles.btnPrimary, padding: '5px 11px', fontSize: 12 }}>
-          ✓ อนุมัติและส่งให้ HR Admin
-        </button>
-      </div>
     </div>
   );
+}
 
+// ── Shared full-page mockup ───────────────────────────────────────────
+// Stacks: tier filter → inbox list (+bulk bar) → urgency banner →
+// snapshot → outcome/rating → conditional branches. Same background
+// across every frame; spotlight rotates between regions.
+function probationPageMockup() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <RowTierFilter/>
+      <RowInboxList/>
+      <RowUrgencyBanner/>
+      <RowSnapshot/>
+      <RowAssessment/>
+      <RowBranches/>
+    </div>
+  );
+}
+
+// ── Spotlight regions (frame-space) ───────────────────────────────────
+// Measured against rendered layout. Mockup column = 40..920 (880 wide),
+// starts at y = BODY_TOP. Each row consumes its height + 14px gap.
+const SPOTX = WALK.MOCKUP_X - 4;
+const SPOTW = WALK.MOCKUP_W + 8;
+const REGIONS = {
+  tiers:    { y: WALK.BODY_TOP - 4,    h: 90  },  // tier filter strip
+  bulkBar:  { y: WALK.BODY_TOP + 100,  h: 48  },  // ink bulk-action bar
+  list:     { y: WALK.BODY_TOP + 156,  h: 162 },  // inbox list
+  banner:   { y: WALK.BODY_TOP + 332,  h: 80  },  // urgency banner
+  snapshot: { y: WALK.BODY_TOP + 426,  h: 142 },  // employee snapshot
+  outcome:  { y: WALK.BODY_TOP + 582,  h: 168 },  // outcome 3 cards
+  rating:   { y: WALK.BODY_TOP + 762,  h: 198 },  // rating + notes
+  branches: { y: WALK.BODY_TOP + 974,  h: 460 },  // 3 conditional branches
+};
+
+const PROBATION_FRAME_H = 1620;
+const COMMON = {
+  totalSteps: 4,
+  persona: 'Manager · คุณจงรักษ์',
+  frameHeight: PROBATION_FRAME_H,
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// Frame 1 · คัดกรอง — Inbox triage
+// ═══════════════════════════════════════════════════════════════════
+function ProbationWalk1() {
   return (
     <WalkFrame
-      stepIdx={4} totalSteps={4}
-      persona="HR Admin · จอร์แดน เหมย"
-      title="ปลายทาง · ฟอร์มแตกตาม outcome"
-      narrative="3 outcome → 3 ชุดข้อมูลที่ต่างกันโดยสิ้นเชิง (ไม่ใช่ปุ่ม submit เดียวกัน): Extend ต้องการเส้นตายใหม่, Pass ต้องการวันบรรจุ + allowance ส่ง Payroll, No-pass ต้องการเหตุผลกฎหมาย · ระบบสาขาฟอร์มแทนที่จะแสดงทุก field พร้อมกัน"
-      mockup={mockup}
+      {...COMMON}
+      stepIdx={1}
+      title="คัดกรอง · 4-tier urgency แยกเคสด่วนทันที"
+      narrative="Manager ดูแลเคสทดลองงานหลายคน — Inbox ต้องบอกได้ทันทีว่า 'ใครรอด่วน' โดยไม่ต้องไล่อ่านทุกแถว · ใช้ tier filter 4 ระดับ + bulk-select เพื่อ batch อนุมัติเคสปกติได้ในคลิกเดียว"
+      mockup={probationPageMockup()}
+      dim
       callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 8,   y: WALK.BODY_TOP + 50,  w: 864, h: 124, color: WALK.warning },
-        { num: 2, x: WALK.MOCKUP_X + 8,   y: WALK.BODY_TOP + 184, w: 864, h: 124, color: WALK.accent },
-        { num: 3, x: WALK.MOCKUP_X + 8,   y: WALK.BODY_TOP + 318, w: 864, h: 124, color: WALK.danger },
-        { num: 4, x: WALK.MOCKUP_X + 530, y: WALK.BODY_TOP + 458, w: 340, h: 42,  radius: 10 },
+        { num: 1, x: SPOTX, y: REGIONS.tiers.y,   w: SPOTW, h: REGIONS.tiers.h,   color: WALK.accent },
+        { num: 2, x: SPOTX, y: REGIONS.bulkBar.y, w: SPOTW, h: REGIONS.bulkBar.h, color: WALK.ink },
+        { num: 3, x: SPOTX, y: REGIONS.list.y,    w: SPOTW, h: REGIONS.list.h,    color: WALK.coral },
       ]}
       annotations={[
-        { num: 1, title: 'Extend = date picker + ระยะ',
-          body: 'ขยายเวลาต้องระบุเส้นตายใหม่ (date) + ระยะ (30/45/60 select); butter tinted bg + warning border สื่อ "ใส่ใจ ไม่ใช่ฉลอง" — กฎ "ไม่เกิน 119 วัน" เป็น hint ใต้ field',
-          color: WALK.warning },
-        { num: 2, title: 'Pass = วันบรรจุ + Allowance',
-          body: 'ผ่านทดลองงานต้องส่งข้อมูลให้ Payroll ทันที — วันบรรจุ effective + Allowance number; teal bg fade สื่อความสำเร็จ; hint "auto → Payroll" บอก downstream effect',
+        { num: 1, title: '4-tier filter + count badge',
+          body: 'ทำไมไม่ใช้ dropdown filter? เพราะ dropdown ซ่อนตัวเลข — manager ต้องเปิดดูถึงรู้ว่า "เร่งด่วน" มีกี่เคส. การ์ด 4 ใบเรียงตามความเร่งด่วน + ตัวเลขใหญ่ scan ได้ใน 1 วินาทีก่อนเลือก. Active tier ใช้ ink border + cream bg ไม่ใช่ accent fill — สี border neutral ไม่กลบสี tier badge เอง.',
           color: WALK.accent },
-        { num: 3, title: 'No-pass = เหตุผล + วันสิ้นสภาพ',
-          body: 'ฟอร์ม sensitive ที่สุด — เหตุผลเป็น select ไม่ใช่ free text เพื่อให้กฎหมายตรวจง่าย; วันสิ้นสภาพต้อง +1 รอบ Payroll ตามกฎหมายแรงงาน (hint บอกไว้)',
+        { num: 2, title: 'Bulk-action bar สีดำลอยเหนือ list',
+          body: 'ทำไม bulk action ไม่ติด toolbar คงที่? เพราะ default state มันรกพื้นที่ — bar นี้โผล่เมื่อเลือก ≥1 รายการเท่านั้น. ink solid + white text contrast สูงกว่า card ปกติ ให้สายตารู้ทันทีว่า "ตอนนี้ batch ได้". "อนุมัติทั้งหมด (Pass)" เป็น primary สำหรับเคสปกติที่ Manager มั่นใจ — ไม่ต้องเปิดทีละเคส.',
+          color: WALK.ink },
+        { num: 3, title: 'แถวเดียวบอกครบ · tag เร่งด่วน vs ใกล้ครบ',
+          body: 'ทำไมไม่แยกตารางตาม tier? เพราะ manager คิดเป็น "พนักงาน" ไม่ใช่ "tier" — แสดงทุกเคสในตารางเดียว แล้ว tag สีบอก urgency. เร่งด่วน = danger soft (red), ใกล้ครบ = butter soft (yellow) — ตาจับ urgency ทันทีโดยไม่ต้องอ่านตัวเลขวัน. row layout: avatar · ชื่อ · ตำแหน่ง · วันคงเหลือ · tag — ครบใน scan แนวนอนเดียว.',
+          color: WALK.coral },
+      ]}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Frame 2 · เร่งด่วน — Countdown banner + colour code
+// ═══════════════════════════════════════════════════════════════════
+function ProbationWalk2() {
+  return (
+    <WalkFrame
+      {...COMMON}
+      stepIdx={2}
+      title="เร่งด่วน · countdown banner + tier colour code"
+      narrative="ทดลองงานมี hard deadline — ถ้าพลาดระบบ auto-pass อัตโนมัติ (กฎ HR + แรงงาน). Manager ต้องเห็น urgency ก่อนเปิด detail · banner สีแดงตอบ 'เหลือกี่วัน' + 'ถ้าไม่ทำจะเกิดอะไร' ในกล่องเดียว"
+      mockup={probationPageMockup()}
+      dim
+      callouts={[
+        { num: 1, x: SPOTX, y: REGIONS.banner.y, w: SPOTW, h: REGIONS.banner.h, color: WALK.danger },
+        { num: 2, x: WALK.MOCKUP_X + 750, y: REGIONS.banner.y + 22, w: 130, h: 38, color: WALK.danger, radius: 10 },
+        { num: 3, x: SPOTX, y: REGIONS.list.y + 110, w: SPOTW, h: 50, color: WALK.warning },
+      ]}
+      annotations={[
+        { num: 1, title: 'Banner = danger soft bg + ink border',
+          body: 'ทำไมไม่ใช้ red solid (banner เต็มสีแดง)? เพราะ red solid อ่านเหมือน error/ล้มเหลว — กรณีนี้ไม่ใช่ error แต่เป็น deadline พึงระวัง. ใช้ #FEE2E2 bg อ่อน + #EF4444 border + #B91C1C text — สื่อ "ต้องทำ" แต่ไม่ alarming. ไอคอน "!" ใน white circle เพิ่ม contrast ในกรอบสีเดียวกัน. body ระบุ consequence ชัด ("ระบบจะ auto-pass") เพื่อให้ manager รู้ว่าทำไมเร่ง.',
           color: WALK.danger },
-        { num: 4, title: 'Submit ไป HR Admin ไม่ใช่ Payroll',
-          body: 'CTA "อนุมัติและส่งให้ HR Admin" — manager ไม่ commit Payroll โดยตรง · approval chain 3 ขั้น (Manager → HR Admin → Payroll) ปกป้องไม่ให้ผิดพลาดส่งเงินผิดคน' },
+        { num: 2, title: 'Countdown pill ขวาสุด · Z-pattern stop',
+          body: 'ทำไมต้อง redundant กับ title? เพราะ Z-pattern reading — สายตา manager หยุดที่มุมขวาสุดของ banner ก่อนเริ่มอ่าน body. pill "10 วัน" ใน red solid วางตรงนั้นเพื่อ scan 0.5 วินาทีก็เห็น. ตัวเลขซ้ำกับ "เหลือ 10 วัน" ใน title — จงใจให้เกินพอ scan ได้ทั้งจากซ้ายไปขวา หรือกระโดดมาขวาก่อน.',
+          color: WALK.danger },
+        { num: 3, title: 'Colour ramp ใช้ซ้ำใน row · ไม่ใช่ traffic light',
+          body: 'ทำไมไม่ใช้ red/yellow/green ทั่วไป? เพราะคน deuteranopia (color-blind ~8% ชาย) แยก red/green ไม่ออก. ใช้ danger red + butter (warm yellow) + sage (เขียวเทาอบอุ่น) — แต่ละสีต่างกันด้วย hue + saturation ไม่ใช่แค่ shade. ตัวเลข "10/17 วัน" ในแถว list ใช้สีเดียวกับ tag — consistency = predictability, manager ไม่ต้องอ่าน label ก็รู้ว่าอยู่ tier ไหน.',
+          color: WALK.warning },
+      ]}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Frame 3 · ประเมิน — Snapshot → outcome → rating
+// ═══════════════════════════════════════════════════════════════════
+function ProbationWalk3() {
+  return (
+    <WalkFrame
+      {...COMMON}
+      stepIdx={3}
+      title="ประเมิน · snapshot → outcome → quality"
+      narrative="หน้าเดียวจบ 3 ขั้น: ดูว่าใคร (snapshot) → ตัดสินอะไร (outcome) → อธิบายทำไม (rating + notes). ลำดับนี้ mirror ขั้นตอนความคิดของหัวหน้างาน · ไม่บังคับให้เดินตามขั้นแบบ wizard"
+      mockup={probationPageMockup()}
+      dim
+      callouts={[
+        { num: 1, x: SPOTX, y: REGIONS.snapshot.y, w: SPOTW, h: REGIONS.snapshot.h, color: WALK.accent },
+        { num: 2, x: SPOTX, y: REGIONS.outcome.y,  w: SPOTW, h: REGIONS.outcome.h,  color: WALK.coral },
+        { num: 3, x: SPOTX, y: REGIONS.rating.y,   w: SPOTW, h: REGIONS.rating.h,   color: WALK.warning },
+      ]}
+      annotations={[
+        { num: 1, title: 'Snapshot cream · context first ไม่ใช่ form',
+          body: 'ทำไม snapshot อยู่บนสุดของ assessment? เพราะก่อนตัดสินใจ manager ต้องตอบ "ใคร" ในหัวก่อน. ใช้ cream variant (ไม่ใช่ white surface) สื่อ "เป็น context อ่านอย่างเดียว ไม่ต้องแก้". 4 facts (ตำแหน่ง · วันเริ่มงาน · อายุงาน · หัวหน้า) ครอบคลุมคำถามที่ manager ถามก่อนกดเสมอ — ไม่ต้องเปิด profile แยก.',
+          color: WALK.accent },
+        { num: 2, title: 'Outcome = radio card 3 ใบ · ไม่ใช่ dropdown',
+          body: 'ทำไมไม่ใช้ dropdown หรือ button group? Dropdown ซ่อนทางเลือก (Manager ลืมว่า "ขยายเวลา" มี); button group สื่อ "กดแล้วทำเลย" ทำให้พลาดง่าย. radio card บังคับเลือก 1 ใน 3 พร้อม sub-line อธิบาย consequence ("บรรจุเป็น Permanent" / "ทดลองต่อ 30-60 วัน" / "สิ้นสภาพหลังบันทึก") — manager เห็นปลายทางก่อน commit. selected = outcome color border + creamSoft bg (ไม่ fill ทั้งใบเพราะกลบ icon).',
+          color: WALK.coral },
+        { num: 3, title: 'Star quant + 2 textarea qual · คู่กัน',
+          body: 'ทำไมต้องมีทั้ง star และ textarea? เพราะ score เดี่ยวบอก "เท่าไหร่" แต่ไม่บอก "ทำไม" — HR review ต้องเห็น qualitative trail. star = 1-5 + inline label ("4/5 — เกินมาตรฐาน") ช่วย anchor meaning; textarea 2 ช่อง "จุดเด่น/จุดที่ต้องพัฒนา" บังคับ — ป้องกัน manager ใส่แค่ตัวเลขลอย ๆ. การแยก 2 ช่องดีกว่า single comment เพราะบังคับให้คิดทั้ง 2 ด้าน.',
+          color: WALK.warning },
+      ]}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Frame 4 · ปลายทาง — Conditional branches
+// ═══════════════════════════════════════════════════════════════════
+function ProbationWalk4() {
+  return (
+    <WalkFrame
+      {...COMMON}
+      stepIdx={4}
+      persona="HR Admin · จอร์แดน เหมย"
+      title="ปลายทาง · ฟอร์มแตกตาม outcome"
+      narrative="3 outcome → 3 ชุดข้อมูลที่ต่างกันโดยสิ้นเชิง · Extend ต้องการเส้นตายใหม่, Pass ต้องการวันบรรจุ + allowance, No-pass ต้องการเหตุผลกฎหมาย. ระบบสาขาฟอร์มแทนที่จะแสดงทุก field พร้อมกัน — ลด form length 60%"
+      mockup={probationPageMockup()}
+      dim
+      callouts={[
+        { num: 1, x: SPOTX, y: REGIONS.branches.y + 50,  w: SPOTW, h: 130, color: WALK.warning },
+        { num: 2, x: SPOTX, y: REGIONS.branches.y + 188, w: SPOTW, h: 130, color: WALK.accent },
+        { num: 3, x: SPOTX, y: REGIONS.branches.y + 326, w: SPOTW, h: 130, color: WALK.danger },
+      ]}
+      annotations={[
+        { num: 1, title: 'Extend = date + ระยะ · butter warm tone',
+          body: 'ทำไมขยายเวลาใช้ warm warning ไม่ใช่ neutral? เพราะการขยายเวลามี cost (manager ต้องประเมินใหม่ + พนักงานรอ) — สี butter สื่อ "ใส่ใจ ไม่ใช่ปกติ". field "ขยายถึงวันที่" + "ระยะ" คู่กันเพราะกฎ HR กำหนด "ไม่เกิน 119 วัน" — hint ใต้ field บอก rule แทนซ่อนใน docs. select 30/45/60 แทน free input — ป้องกัน admin ใส่เลขผิด.',
+          color: WALK.warning },
+        { num: 2, title: 'Pass = วันบรรจุ + Allowance ส่ง Payroll',
+          body: 'ทำไม Pass ต้องการ allowance? เพราะกฎหมายแรงงาน — ผ่านทดลองงานต้องเปิดสิทธิ + อาจเพิ่ม allowance ตาม policy. teal bg fade สื่อความสำเร็จ ไม่ alarming. hint "auto → Payroll" บอก downstream effect — admin รู้ทันทีว่า field นี้กระทบเงินเดือน, จะตรวจรอบให้แน่ใจก่อน submit.',
+          color: WALK.accent },
+        { num: 3, title: 'No-pass = เหตุผล select + วันสิ้นสภาพ',
+          body: 'ทำไมเหตุผลเป็น select ไม่ใช่ free text? เพราะ termination ฟ้องกฎหมายได้ — free text ทำให้ทนายตีความได้กว้าง. select จาก master list ("ขาดทักษะ POS · เกิน 3 ครั้ง" เป็นต้น) ที่ HR + กฎหมายเห็นชอบล่วงหน้า. วันสิ้นสภาพ +1 รอบ Payroll ตามกฎหมายแรงงาน — hint บอกไว้ก่อนกรอก. red soft bg = sensitive ที่สุด แต่ไม่ red solid (ไม่ใช่ error เป็น choice).',
+          color: WALK.danger },
       ]}
     />
   );

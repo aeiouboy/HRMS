@@ -1,22 +1,25 @@
 // walkthrough-home.jsx
 // Home module Design Walkthrough (Manager persona).
-// 4 frames following the first-touch arc:
+//
+// RETROFIT PATTERN (static page + rotating spotlight):
+//   homePageMockup() renders the entire Home page (4 stacked rows that
+//   mirror prod-home.jsx) and is reused as the same background across
+//   all 4 frames. Each frame keeps that context fixed and only moves
+//   the spotlight (dim mask + dashed outline) to a different row,
+//   pairing it with rationale annotations that answer "ทำไมเราดีไซน์
+//   แบบนี้" — not "what it is".
+//
+// Frames (first-touch arc — same as before, new visualisation):
 //   01 แรกเข้า       — Greeting hero + Today's attendance pulse
 //   02 รับข้อมูล     — Organisational Updates tiles
 //   03 ลงมือทำ      — Leave approvals + Pending documents
 //   04 เชื่อมสัมพันธ์ — Announcements feed + Birthday card
-//
-// Each mockup is an inline-style replica of the corresponding Row in
-// prod-home.jsx (kept inline so this overview is robust against
-// changes in the live mockup file).
 
 const { WALK, WalkFrame, WalkAvatar, WalkTag, walkStyles } = window;
 
-// ═══════════════════════════════════════════════════════════════════
-// Frame 1 · แรกเข้า — Greeting + Today's pulse
-// ═══════════════════════════════════════════════════════════════════
-function HomeWalk1() {
-  const mockup = (
+// ── Row 1 · Hero greeting + Today's pulse ─────────────────────────────
+function Row1HeroToday() {
+  return (
     <div style={{ display: 'grid', gap: 18, gridTemplateColumns: '1.35fr 1fr' }}>
       {/* Hero greeting card */}
       <div style={{ ...walkStyles.card(false), paddingRight: 90, minHeight: 240 }}>
@@ -120,38 +123,10 @@ function HomeWalk1() {
       </div>
     </div>
   );
-
-  return (
-    <WalkFrame
-      stepIdx={1} totalSteps={4}
-      persona="Manager · คุณจงรักษ์"
-      title="แรกเข้า · ทักทายแล้ว surface งานเร่งด่วน"
-      narrative="เปิด Humi ตอนเช้า Home ต้องตอบ 2 คำถามภายใน 3 วินาที — 'ฉันคือใคร วันนี้คือวันอะไร' และ 'มีอะไรต้องทำ' Hero ทักทายแบบ time-aware + summary คำขอ; Today card ให้ pulse องค์กรในรูป ring + breakdown"
-      mockup={mockup}
-      callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 12,  y: WALK.BODY_TOP + 8,   w: 365, h: 110 },
-        { num: 2, x: WALK.MOCKUP_X + 12,  y: WALK.BODY_TOP + 132, w: 280, h: 50  },
-        { num: 3, x: WALK.MOCKUP_X + 528, y: WALK.BODY_TOP + 50,  w: 340, h: 130 },
-        { num: 4, x: WALK.MOCKUP_X + 528, y: WALK.BODY_TOP + 198, w: 340, h: 48  },
-      ]}
-      annotations={[
-        { num: 1, title: 'Greeting แบบ time-aware',
-          body: 'สวัสดี + ชื่อจริง + วันที่ภาษาไทย (พ.ศ.) ในทันทีที่เปิด — ลด cognitive load ก่อนเริ่มงาน และยืนยัน identity ว่า login ถูก persona' },
-        { num: 2, title: 'Primary + Secondary action',
-          body: 'Teal solid = action ที่ต้องทำตอนนี้ (ตรวจคำขอลา 2 รายการ) · Ghost = exploration (ดูประกาศ) — แยกชัดด้วย hierarchy ของสีและ weight' },
-        { num: 3, title: 'Pulse ring 78% + breakdown',
-          body: 'ring chart conic-gradient อ่านได้แว้บเดียว (193/247 ทำงาน) แทน table; breakdown ให้ context (ลา 32, นอกกะ 22) ใช้ warm token แทน red/green' },
-        { num: 4, title: 'Avatar stack = humanise number',
-          body: '+188 คนทำงานอยู่ ไม่ใช่แค่ตัวเลข — เห็นคน 5 หน้ามาก่อน ช่วยสร้างความรู้สึก team awareness ตามหลัก Humi warm-Thai-first' },
-      ]}
-    />
-  );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Frame 2 · รับข้อมูล — Organisational Updates
-// ═══════════════════════════════════════════════════════════════════
-function HomeWalk2() {
+// ── Row 2 · Organisational Updates ────────────────────────────────────
+function Row2OrgUpdates() {
   const BRAND_PALETTES = [
     [WALK.accent,  '#D6EEEC'],
     [WALK.coral,   WALK.coralSoft],
@@ -170,7 +145,7 @@ function HomeWalk2() {
     { l: 'Tax Deduction',           badge: null },
   ].map((t, i) => ({ ...t, palette: BRAND_PALETTES[i % BRAND_PALETTES.length] }));
 
-  const mockup = (
+  return (
     <div style={{ ...walkStyles.card(true), padding: '20px 22px' }}>
       <div style={{
         position: 'absolute', width: 100, height: 130, right: -30, top: -40,
@@ -237,38 +212,10 @@ function HomeWalk2() {
       </div>
     </div>
   );
-
-  return (
-    <WalkFrame
-      stepIdx={2} totalSteps={4}
-      persona="Manager · คุณจงรักษ์"
-      title="รับข้อมูล · ลิงก์องค์กรในที่เดียว"
-      narrative="ก่อนเริ่มงาน Manager มักต้องเช็คข่าวสาร/ลิงก์จากสำนักงานใหญ่ — เอา shortcut ของ Central Retail intranet มารวมไว้ที่ Home แทนการบังคับเปิดหน้าใหม่"
-      mockup={mockup}
-      callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 14,  y: WALK.BODY_TOP + 14, w: 230, h: 50  },
-        { num: 2, x: WALK.MOCKUP_X + 530, y: WALK.BODY_TOP + 20, w: 320, h: 36, radius: 18 },
-        { num: 3, x: WALK.MOCKUP_X + 230, y: WALK.BODY_TOP + 88, w: 200, h: 84  },
-        { num: 4, x: WALK.MOCKUP_X + 230, y: WALK.BODY_TOP + 92, w: 38,  h: 18, radius: 6 },
-      ]}
-      annotations={[
-        { num: 1, title: 'Section eyebrow + title',
-          body: 'Eyebrow uppercase "ลิงก์องค์กร · Central Retail" บอก scope; title display font แยก typography hierarchy จาก body — pattern เดียวกับทุก section ใน Home' },
-        { num: 2, title: 'Filter pills แทน tab',
-          body: 'Pill รวม count ในป้าย (All 12 / News 3 / Quick link 9) ให้รู้ปริมาณก่อนคลิก · active = solid teal, inactive = ghost — ลดการเข้าหน้าใหม่' },
-        { num: 3, title: 'Tile = thumbnail + label',
-          body: 'แต่ละ tile cycle 5 duotone (teal · coral · butter · sage · ink) เพื่อ visual distinction — accent stripe ซ้ายเป็น brand color, thumbnail tinted bg, label เป็น tap target' },
-        { num: 4, title: '"ใหม่" badge สำหรับ surface ใหม่',
-          body: 'Badge teal บน corner เน้นเนื้อหาใหม่ (CNEXT | LINE, Tax Deduction) — ใช้ teal เดียวกับ primary CTA เพื่อ consistency ระหว่าง content และ action' },
-      ]}
-    />
-  );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Frame 3 · ลงมือทำ — Approvals + Pending docs
-// ═══════════════════════════════════════════════════════════════════
-function HomeWalk3() {
+// ── Row 3 · Approvals + Pending docs ──────────────────────────────────
+function Row3Approvals() {
   const approvals = [
     { i: 'MK', c: WALK.accent, n: 'มาร์คัส เคลลี่',  t: 'ลาพักร้อน 5 วัน', w: '28 เม.ย. – 2 พ.ค.', d: 'ยื่นเมื่อวาน' },
     { i: 'PS', c: WALK.butter, n: 'พริยะ ชาห์',      t: 'ลาป่วย 1 วัน',    w: 'พรุ่งนี้',         d: '1 ชม.ก่อน' },
@@ -279,7 +226,7 @@ function HomeWalk3() {
     { t: 'กองทุนสำรองเลี้ยงชีพ',    s: 'เลือกสัดส่วนเงินสมทบ',         near: false },
   ];
 
-  const mockup = (
+  return (
     <div style={{ display: 'grid', gap: 18, gridTemplateColumns: '1.35fr 1fr' }}>
       <div style={{ ...walkStyles.card(false), minHeight: 280 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 12 }}>
@@ -334,38 +281,10 @@ function HomeWalk3() {
       </div>
     </div>
   );
-
-  return (
-    <WalkFrame
-      stepIdx={3} totalSteps={4}
-      persona="Manager · คุณจงรักษ์"
-      title="ลงมือทำ · งานเร่งด่วนใน 1 คลิก"
-      narrative="Manager เห็นงานที่ต้องทำ (อนุมัติลา + เอกสารค้าง) จาก Home โดยตรง — approve/reject inline ไม่ต้องเข้าหน้า approval แยก; เอกสารส่วนตัวปักธง 'ใกล้ครบกำหนด' เพื่อ urgency cue"
-      mockup={mockup}
-      callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 14,  y: WALK.BODY_TOP + 70, w: 490, h: 64 },
-        { num: 2, x: WALK.MOCKUP_X + 365, y: WALK.BODY_TOP + 84, w: 140, h: 36, radius: 10 },
-        { num: 3, x: WALK.MOCKUP_X + 530, y: WALK.BODY_TOP + 4,  w: 340, h: 70 },
-        { num: 4, x: WALK.MOCKUP_X + 770, y: WALK.BODY_TOP + 92, w: 96,  h: 22, radius: 11 },
-      ]}
-      annotations={[
-        { num: 1, title: 'Inline approval row',
-          body: 'แต่ละแถวมี: avatar · ชื่อ + ประเภทลา · ระยะเวลา · timestamp · ปุ่ม approve/reject — ทุกข้อมูลที่ต้องตัดสินใจอยู่ในแถวเดียว ไม่ต้องเข้า detail page' },
-        { num: 2, title: 'Reject ใช้ ghost ไม่ใช่ red solid',
-          body: 'ปุ่ม "ปฏิเสธ" ใช้ ghost (text only) ลด aggressive tone; approve เด่นกว่าด้วย teal solid เพราะเป็น expected path' },
-        { num: 3, title: 'Cream card variant',
-          body: 'เอกสารค้างใช้ creamSoft background แยกจาก approvals (white surface) — สื่อว่าเป็นงานส่วนตัวคนเดียว ไม่ใช่ workflow ที่ต้องตัดสินใจให้คนอื่น' },
-        { num: 4, title: 'Butter tag = ใกล้ครบกำหนด',
-          body: 'ใช้ butter (warm yellow) แทน red urgency — สื่อ "ระวัง" แต่ไม่ alarming; PND91 ภาษีประจำปีเป็น recurring deadline ที่เตือนแต่ไม่ panic' },
-      ]}
-    />
-  );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Frame 4 · เชื่อมสัมพันธ์ — Announcements + Birthday
-// ═══════════════════════════════════════════════════════════════════
-function HomeWalk4() {
+// ── Row 4 · Announcements + Birthday ──────────────────────────────────
+function Row4Community() {
   const posts = [
     {
       who: 'จอร์แดน เหมย · ฝ่ายบุคคล', i: 'JM', c: WALK.sage, w: 'เมื่อวาน', pin: true,
@@ -381,7 +300,7 @@ function HomeWalk4() {
     },
   ];
 
-  const mockup = (
+  return (
     <div style={{ display: 'grid', gap: 18, gridTemplateColumns: '1.35fr 1fr' }}>
       <div style={{ ...walkStyles.card(false), padding: '20px 22px', minHeight: 380 }}>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
@@ -456,29 +375,138 @@ function HomeWalk4() {
       </div>
     </div>
   );
+}
 
+// ── Shared full-page mockup ───────────────────────────────────────────
+// Stacks all 4 rows like the real prod-home.jsx. The spotlight pattern
+// dims everything except the focused row, so viewers always see the
+// spatial relationship between sections — answering "where does Approvals
+// sit relative to Greeting?" without needing 4 different mockups.
+function homePageMockup() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      <Row1HeroToday/>
+      <Row2OrgUpdates/>
+      <Row3Approvals/>
+      <Row4Community/>
+    </div>
+  );
+}
+
+// ── Row Y-offsets within the mockup column (frame-space) ──────────────
+// Mockup starts at y = WALK.BODY_TOP. Each row consumes its minHeight +
+// the 18px gap. Numbers measured against the rendered layout; tweak if
+// minHeights change. (Comment-out tip: ใช้ Playwright วัดเมื่อ visual
+// drift เกิด — ดู PR #3 callout drift fix.)
+const ROWS = {
+  row1: { y: WALK.BODY_TOP - 4,    h: 250 },  // Hero + Today
+  row2: { y: WALK.BODY_TOP + 264,  h: 310 },  // Org updates
+  row3: { y: WALK.BODY_TOP + 590,  h: 296 },  // Approvals + docs
+  row4: { y: WALK.BODY_TOP + 902,  h: 396 },  // Announcements + Birthday
+};
+const SPOTX = WALK.MOCKUP_X - 4;     // shared left edge
+const SPOTW = WALK.MOCKUP_W + 8;     // bleed slightly past mockup edges
+
+// Frame height accommodates 4 stacked rows + padding.
+const HOME_FRAME_H = 1380;
+
+const COMMON = {
+  totalSteps: 4,
+  persona: 'Manager · คุณจงรักษ์',
+  frameHeight: HOME_FRAME_H,
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// Frame 1 · แรกเข้า — Greeting hero + Today's pulse
+// ═══════════════════════════════════════════════════════════════════
+function HomeWalk1() {
   return (
     <WalkFrame
-      stepIdx={4} totalSteps={4}
-      persona="Manager · คุณจงรักษ์"
-      title="เชื่อมสัมพันธ์ · Humi ไม่ใช่แค่ admin tool"
-      narrative="Announcement feed + Birthday widget ทำให้ Home รู้สึก 'อบอุ่น' ตามหลักการ Humi (warm · Thai-first · human) แยกจาก SAP SuccessFactors เดิมที่เป็น admin tool ล้วน — culture surface ก่อน workflow"
-      mockup={mockup}
+      {...COMMON}
+      stepIdx={1}
+      title="แรกเข้า · ทักทายแล้ว surface งานเร่งด่วน"
+      narrative="เปิด Humi ตอนเช้า Home ต้องตอบ 2 คำถามภายใน 3 วินาที — 'ฉันคือใคร วันนี้คือวันอะไร' และ 'มีอะไรต้องทำ'. Hero ทักทาย time-aware + summary; Today ring + breakdown ให้ pulse ขององค์กรในแว้บเดียว"
+      mockup={homePageMockup()}
+      dim
       callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 14,  y: WALK.BODY_TOP + 56,  w: 490, h: 156 },
-        { num: 2, x: WALK.MOCKUP_X + 28,  y: WALK.BODY_TOP + 170, w: 170, h: 30, radius: 15 },
-        { num: 3, x: WALK.MOCKUP_X + 530, y: WALK.BODY_TOP,       w: 340, h: 200 },
-        { num: 4, x: WALK.MOCKUP_X + 752, y: WALK.BODY_TOP + 152, w: 116, h: 36, radius: 10 },
+        { num: 1, x: SPOTX, y: ROWS.row1.y, w: SPOTW, h: ROWS.row1.h, color: WALK.accent },
       ]}
       annotations={[
-        { num: 1, title: 'Pinned post · butter halo',
-          body: 'โพสต์ปักหมุด (นโยบายลาคลอด) ใช้ creamSoft bg + butter border ให้เด่นจาก feed ปกติ; tag "📌 ปักหมุด" ink dark เพื่อ contrast สูง — scan เจอใน 1 วินาที' },
-        { num: 2, title: 'Emoji reactions = ไม่ทางการ',
-          body: '❤️ 42 · 🎉 21 แทน "Like" button — สื่อ tone เพื่อนร่วมงาน ไม่ใช่ corporate; reaction count แสดงให้รู้สึก community engagement' },
-        { num: 3, title: 'Dark ink variant card',
-          body: 'Birthday widget ใช้ ink background (#0E1B2C) ตัดกับทุก card อื่นในหน้า — เปลี่ยน mood จาก "งาน" เป็น "ฉลอง"; teal accent กลับมาเป็น text color บน dark surface' },
-        { num: 4, title: '"ส่งคำอวยพร" CTA บน dark',
-          body: 'Primary button teal เหมือนเดิม — invariant ของ design system: primary action สีเดียวกันไม่ว่า surface เป็น light/dark/cream; user คาดเดา interaction ได้ตลอด' },
+        { num: 1, title: 'Greeting + Today vs ตาราง full attendance',
+          body: 'ทำไมไม่ใส่ตารางลงเวลาแบบ SAP? เพราะ Manager ที่เปิด Home ตอนเช้า ต้องการ "พอใจ scan ได้ใน 3 วิ" ก่อน decide. Ring 78% + 193/247 ตอบคำถามนี้แทน table; CTA "ตรวจคำขอลา" surface งานเร่งด่วนทันที. Hierarchy ของ greeting + pulse คือ "เพื่อจะรู้ว่ามีอะไรต้องทำ ต้องรู้ก่อนว่าวันนี้องค์กรเป็นยังไง"',
+          color: WALK.accent },
+      ]}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Frame 2 · รับข้อมูล — Organisational Updates
+// ═══════════════════════════════════════════════════════════════════
+function HomeWalk2() {
+  return (
+    <WalkFrame
+      {...COMMON}
+      stepIdx={2}
+      title="รับข้อมูล · ลิงก์องค์กรในที่เดียว"
+      narrative="ก่อนเริ่มงาน Manager มักต้องเช็คข่าวสาร/ลิงก์จากสำนักงานใหญ่ — เอา shortcut ของ Central Retail intranet มาวางที่ Home แทนการบังคับเปิดหน้าใหม่"
+      mockup={homePageMockup()}
+      dim
+      callouts={[
+        { num: 1, x: SPOTX, y: ROWS.row2.y, w: SPOTW, h: ROWS.row2.h, color: WALK.indigo },
+      ]}
+      annotations={[
+        { num: 1, title: 'Tiles 4-col grid + filter pills (All/News/Quick)',
+          body: 'ทำไมไม่เป็น dropdown menu? เพราะ "ลิงก์องค์กร" คือ destination ที่ open frequency สูง — ถ้าซ่อนใน dropdown จะ buried คลิก 2 ครั้ง. เป็น tile grid โชว์ทั้งหมด + filter pill มี count (All 12 / News 3 / Quick link 9) ให้รู้ปริมาณก่อนคลิก. แต่ละ tile cycle 5 brand duotone (teal · coral · butter · sage · ink) เพื่อ visual distinction; "ใหม่" badge teal เน้น content ใหม่',
+          color: WALK.indigo },
+      ]}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Frame 3 · ลงมือทำ — Approvals + Pending docs
+// ═══════════════════════════════════════════════════════════════════
+function HomeWalk3() {
+  return (
+    <WalkFrame
+      {...COMMON}
+      stepIdx={3}
+      title="ลงมือทำ · งานเร่งด่วนใน 1 คลิก"
+      narrative="Manager เห็นงานที่ต้องทำ (อนุมัติลา + เอกสารค้าง) จาก Home โดยตรง — approve/reject inline ไม่ต้องเข้าหน้า approval แยก; เอกสารส่วนตัวปักธง 'ใกล้ครบกำหนด' เป็น urgency cue"
+      mockup={homePageMockup()}
+      dim
+      callouts={[
+        { num: 1, x: SPOTX, y: ROWS.row3.y, w: SPOTW, h: ROWS.row3.h, color: WALK.coral },
+      ]}
+      annotations={[
+        { num: 1, title: 'Inline approve · ghost reject · butter "ใกล้ครบกำหนด"',
+          body: 'ทำไม approve/reject อยู่ในแถวแทนที่จะลึก 1 click? เพราะการที่ Manager ต้อง "เข้าหน้า detail" ทุกครั้งทำให้ยอม batch approve โดยไม่ดู context — เสี่ยง err. ใส่ทุกข้อมูลจำเป็นในแถวเดียว (avatar · ชื่อ · ประเภท · ระยะ · timestamp · ปุ่ม). "ปฏิเสธ" ใช้ ghost button ไม่ใช่ red solid ลด aggressive tone; "ใกล้ครบกำหนด" ใช้ butter (warm) แทน red — เตือนแต่ไม่ panic เพราะ PND91 เป็น recurring deadline',
+          color: WALK.coral },
+      ]}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Frame 4 · เชื่อมสัมพันธ์ — Announcements + Birthday
+// ═══════════════════════════════════════════════════════════════════
+function HomeWalk4() {
+  return (
+    <WalkFrame
+      {...COMMON}
+      stepIdx={4}
+      title="เชื่อมสัมพันธ์ · Humi ไม่ใช่แค่ admin tool"
+      narrative="Announcement feed + Birthday widget ทำให้ Home รู้สึก 'อบอุ่น' ตามหลัก Humi (warm · Thai-first · human) แยกจาก SAP SuccessFactors เดิมที่เป็น admin tool ล้วน — culture surface ก่อน workflow"
+      mockup={homePageMockup()}
+      dim
+      callouts={[
+        { num: 1, x: SPOTX, y: ROWS.row4.y, w: SPOTW, h: ROWS.row4.h, color: WALK.butter },
+      ]}
+      annotations={[
+        { num: 1, title: 'Pinned post · emoji reactions · dark Birthday card',
+          body: 'ทำไม Home ของ HR ต้องมี emoji + Birthday? เพราะ Humi positioning คือ "warm · Thai-first" — ตัด tone "ระบบ admin" ที่ทำให้พนักงานรู้สึกห่าง. Pinned post ใช้ creamSoft + butter border เด่นจาก feed; ❤️ 42 · 🎉 21 แทน Like button = ภาษาเพื่อนร่วมงาน. Birthday card ใช้ ink dark background ตัดกับทุก card บนหน้านี้ — เปลี่ยน mood จาก "งาน" เป็น "ฉลอง" โดย primary button teal คงเดิมเพื่อ invariant ของ design system',
+          color: WALK.butter },
       ]}
     />
   );

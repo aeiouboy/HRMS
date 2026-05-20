@@ -20,6 +20,9 @@
 <script type="text/babel" src="design-canvas.jsx"></script>
 <script type="text/babel" src="walkthrough-shell.jsx"></script>
 
+<!-- Foundation walkthrough — explains shell primitives BEFORE modules -->
+<script type="text/babel" src="walkthrough-foundation.jsx"></script>
+
 <!-- Per-module walkthroughs -->
 <script type="text/babel" src="walkthrough-home.jsx"></script>
 <script type="text/babel" src="walkthrough-employee.jsx"></script>
@@ -38,18 +41,30 @@ const { DesignCanvas, DCSection, DCArtboard } = window;
 
 const W = 1500, H = 760;
 
-function Sect({ id, emoji, title, persona, comps }) {
+// Sect renders one walkthrough section as a horizontal storyboard.
+//
+// comps  — [{ name, label, h? }, ...]
+//   name  · window-attached component name (e.g. 'HomeWalk1')
+//   label · short title shown under the artboard
+//   h     · optional artboard height override; required for retrofit
+//           frames that render the full production page as a static
+//           mockup (e.g. Home 1380, Hire 2200). Falls back to H = 760
+//           for legacy frames that still use the 4-mockup pattern.
+function Sect({ id, emoji, title, persona, frames, comps }) {
+  const frameCount = comps.length;
+  const subtitle = `Design Walkthrough · ${frames || frameCount} frame${frameCount === 1 ? '' : 's'} · ${persona}`;
   return (
     <DCSection id={id}
                title={`${emoji} ${title}`}
-               subtitle={`Design Walkthrough · 4 frames · ${persona}`}>
+               subtitle={subtitle}>
       {comps.map((C, i) => {
         const Comp = window[C.name];
+        const h = C.h || H;
         if (!Comp) {
           return (
             <DCArtboard key={C.name} id={`${id}-${i+1}`}
                         label={`${String(i+1).padStart(2,'0')} · ${C.label} (missing: ${C.name})`}
-                        width={W} height={H}>
+                        width={W} height={h}>
               <div style={{padding:40,fontFamily:'system-ui',color:'#888'}}>Component <code>{C.name}</code> not loaded</div>
             </DCArtboard>
           );
@@ -57,7 +72,7 @@ function Sect({ id, emoji, title, persona, comps }) {
         return (
           <DCArtboard key={C.name} id={`${id}-${i+1}`}
                       label={`${String(i+1).padStart(2,'0')} · ${C.label}`}
-                      width={W} height={H}>
+                      width={W} height={h}>
             <Comp/>
           </DCArtboard>
         );
@@ -70,13 +85,23 @@ function App() {
   return (
     <DesignCanvas>
 
+      <Sect id="walk-foundation" emoji="🏛️" title="Foundation · โครงเว็บก่อน module"
+            persona="ทุก persona"
+            comps={[
+              { name: 'FoundationWalk1', label: 'Sidebar · ทำไม vertical nav ฝั่งซ้าย' },
+              { name: 'FoundationWalk2', label: 'Nav grouping · 3 ก้อน เรียงตาม frequency' },
+              { name: 'FoundationWalk3', label: 'Identity ชั้น 1 · sidebar bottom' },
+              { name: 'FoundationWalk4', label: 'Identity ชั้น 2 · persona ribbon' },
+              { name: 'FoundationWalk5', label: 'Topbar · utility cluster ขวาบน' },
+            ]}/>
+
       <Sect id="walk-home" emoji="🏠" title="Home · หน้าแรก"
             persona="Manager"
             comps={[
-              { name: 'HomeWalk1', label: 'แรกเข้า · Greeting + Today pulse' },
-              { name: 'HomeWalk2', label: 'รับข้อมูล · Organisational Updates' },
-              { name: 'HomeWalk3', label: 'ลงมือทำ · Approvals + เอกสารค้าง' },
-              { name: 'HomeWalk4', label: 'เชื่อมสัมพันธ์ · Announcements + Birthday' },
+              { name: 'HomeWalk1', label: 'แรกเข้า · Greeting + Today pulse',          h: 1380 },
+              { name: 'HomeWalk2', label: 'รับข้อมูล · Organisational Updates',         h: 1380 },
+              { name: 'HomeWalk3', label: 'ลงมือทำ · Approvals + เอกสารค้าง',           h: 1380 },
+              { name: 'HomeWalk4', label: 'เชื่อมสัมพันธ์ · Announcements + Birthday',  h: 1380 },
             ]}/>
 
       <Sect id="walk-employee" emoji="👥" title="Employee · ทะเบียนพนักงาน"

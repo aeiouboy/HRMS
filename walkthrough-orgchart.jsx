@@ -1,25 +1,28 @@
 // walkthrough-orgchart.jsx
-// OrgChart module Design Walkthrough (Employee → Manager arc).
-// 4 frames following an exploration journey:
-//   01 ตัวเองอยู่ตรงไหน   — Tree view: chain of command + peers + reports
-//   02 รู้จักคนใกล้ตัว     — Person panel: stats + contact + reporting line
-//   03 หาคนข้ามหน่วย       — Search & list view: filter by name/role/branch
-//   04 เข้าใจโครงสร้าง      — Cross-org: span of control + depth metrics
+// OrgChart module Design Walkthrough (Employee → Manager → HR arc).
 //
-// Frames 1-2 ใช้ persona Employee (มาริสา) สำรวจตำแหน่งตัวเอง
-// Frames 3-4 เปลี่ยนเป็น Manager / HR Admin วิเคราะห์ข้ามหน่วย
+// RETROFIT PATTERN (static page + rotating spotlight):
+//   orgchartPageMockup() renders one shared OrgChart workspace —
+//   header (eyebrow + seg toggle), search box (active state),
+//   2-column body (tree on left · person panel on right), then a
+//   span-of-control analytics card below. The same page is reused
+//   as the static background of every frame; spotlight rotates
+//   between regions.
 //
-// Mockups เป็น inline-style replica ของ OrgChartView ใน mod-orgchart.jsx
-// (เก็บ inline เพื่อกัน drift กับ live component)
+// Frames:
+//   01 ตัวเองอยู่ตรงไหน — Tree view: chain + peers + reports
+//   02 รู้จักคนใกล้ตัว    — Person panel: hero + stats + contact + employment
+//   03 หาคนข้ามหน่วย      — Search active + dropdown (Manager)
+//   04 เข้าใจโครงสร้าง     — Span of control + depth metrics (HR Admin)
 
 const { WALK, WalkFrame, WalkAvatar, WalkTag, walkStyles } = window;
 
-// ── Small helper: org tree node card (mirror of OrgNode) ───────────
-function WalkOrgNode({ initials, name, role, color, size = 'md', highlight, dim }) {
+// ── Org tree node card ────────────────────────────────────────────────
+function WalkOrgNode({ initials, name, role, color, size = 'md', highlight }) {
   const sizes = {
     sm: { w: 124, pad: 8,  av: 26, name: 11.5, role: 10 },
     md: { w: 160, pad: 12, av: 32, name: 12.5, role: 10.5 },
-    lg: { w: 200, pad: 14, av: 48, name: 14,   role: 11 },
+    lg: { w: 180, pad: 12, av: 40, name: 13,   role: 10.5 },
   };
   const s = sizes[size];
   return (
@@ -31,10 +34,7 @@ function WalkOrgNode({ initials, name, role, color, size = 'md', highlight, dim 
       boxShadow: highlight
         ? `0 2px 0 rgba(14,27,44,.06), 0 12px 22px rgba(31,168,160,.20)`
         : '0 1px 2px rgba(14,27,44,.04)',
-      textAlign: 'center',
-      opacity: dim ? 0.55 : 1,
-      flexShrink: 0,
-      display: 'inline-block',
+      textAlign: 'center', flexShrink: 0, display: 'inline-block',
     }}>
       <div style={{ margin: '0 auto 6px', display: 'flex', justifyContent: 'center' }}>
         <WalkAvatar initials={initials} color={color} size={s.av} border={WALK.surface}/>
@@ -44,24 +44,26 @@ function WalkOrgNode({ initials, name, role, color, size = 'md', highlight, dim 
     </div>
   );
 }
-
-function WalkConnector({ h = 16 }) {
+function WalkConnector({ h = 14 }) {
   return <div style={{ width: 2, height: h, background: WALK.hairline, margin: '0 auto' }}/>;
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Frame 1 · ตัวเองอยู่ตรงไหน — Tree view: chain + peers + reports
-// ═══════════════════════════════════════════════════════════════════
-function OrgChartWalk1() {
-  const mockup = (
-    <div style={{ ...walkStyles.card(false), minHeight: 600, padding: '20px 22px' }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 14 }}>
+// ── Workspace header (search + seg toggle) ────────────────────────────
+function WorkspaceHeader() {
+  const results = [
+    { i: 'จท', n: 'จงรักษ์ ทานากะ',   r: 'ผู้จัดการสาขา II',  c: WALK.coral },
+    { i: 'JO', n: 'เจส โอคอน',         r: 'ผู้จัดการสาขา',     c: WALK.accent },
+    { i: 'AK', n: 'อาเมียร์ คาลิล',    r: 'ผู้จัดการสาขา',     c: WALK.butter },
+  ];
+
+  return (
+    <div style={{ ...walkStyles.card(false), padding: '16px 20px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 12 }}>
         <div>
-          <div style={walkStyles.eyebrow}>สายบังคับบัญชา</div>
-          <h3 style={walkStyles.h3Display}>ผังองค์กร</h3>
+          <div style={walkStyles.eyebrow}>ค้นหาบุคคล · ผังองค์กร</div>
+          <h3 style={walkStyles.h3Display}>Central Retail · 247 คน</h3>
         </div>
         <div style={{ flex: 1 }}/>
-        {/* Seg tabs */}
         <div style={{
           display: 'inline-flex',
           background: WALK.creamSoft,
@@ -80,22 +82,50 @@ function OrgChartWalk1() {
         </div>
       </div>
 
-      {/* Search bar (collapsed, no dropdown in frame 1) */}
+      {/* Active search field with results dropdown */}
       <div style={{
-        position: 'relative', marginBottom: 18,
-        background: WALK.creamSoft,
-        border: `1px solid ${WALK.hairline}`,
+        position: 'relative',
+        background: WALK.surface,
+        border: `1.5px solid ${WALK.accent}`,
         borderRadius: 10,
         padding: '9px 12px 9px 34px',
-        fontSize: 12.5, color: WALK.inkMuted,
+        fontSize: 13, color: WALK.ink,
+        boxShadow: `0 0 0 4px ${WALK.accentSoft}`,
       }}>
-        <span style={{ position: 'absolute', left: 12, top: 9, color: WALK.inkMuted }}>🔍</span>
-        ค้นหาชื่อหรือตำแหน่ง…
+        <span style={{ position: 'absolute', left: 12, top: 9, color: WALK.accent }}>🔍</span>
+        ผู้จัดการสาขา
+        <span style={{ display: 'inline-block', width: 1, height: 14, background: WALK.accent, marginLeft: 2, verticalAlign: 'middle' }}/>
       </div>
+      <div style={{
+        background: WALK.surface,
+        border: `1px solid ${WALK.hairline}`,
+        borderRadius: 12,
+        boxShadow: '0 6px 18px rgba(14,27,44,.08)',
+        padding: 6, marginTop: 6,
+      }}>
+        {results.map(r => (
+          <div key={r.n} style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '7px 10px', borderRadius: 8,
+          }}>
+            <WalkAvatar initials={r.i} color={r.c} size={26}/>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: WALK.ink }}>{r.n}</div>
+              <div style={{ fontSize: 10.5, color: WALK.inkMuted }}>{r.r}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-      {/* Tree */}
+// ── Tree column ───────────────────────────────────────────────────────
+function TreeColumn() {
+  return (
+    <div style={{ ...walkStyles.card(false), padding: '18px 16px' }}>
+      <div style={{ ...walkStyles.eyebrow, marginBottom: 12 }}>สายบังคับบัญชา</div>
       <div style={{ textAlign: 'center', paddingBottom: 8 }}>
-        {/* Chain: Grace → Jordan → Dana → Ava */}
         <WalkOrgNode initials="GH" name="เกรซ หวง" role="CHRO" color={WALK.ink} size="sm"/>
         <WalkConnector/>
         <WalkOrgNode initials="JM" name="จอร์แดน เหมย" role="People Ops Director" color={WALK.sage} size="sm"/>
@@ -105,7 +135,6 @@ function OrgChartWalk1() {
         <WalkOrgNode initials="จท" name="จงรักษ์ ทานากะ" role="ผจก.สาขา II" color={WALK.coral} size="sm"/>
         <WalkConnector/>
 
-        {/* Selected — Arthit (large) */}
         <WalkOrgNode initials="AC" name="อาทิตย์ ชื่นบาน" role="หัวหน้ากะ · Store L1" color={WALK.sage} size="lg" highlight/>
 
         <WalkConnector h={12}/>
@@ -113,54 +142,24 @@ function OrgChartWalk1() {
           fontSize: 9.5, color: WALK.inkFaint, textTransform: 'uppercase',
           letterSpacing: '.12em', marginBottom: 8, fontWeight: 600,
         }}>ลูกทีม · 6 คน</div>
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <WalkOrgNode initials="MS" name="มาริสา" role="Cashier · L1"        color={WALK.accent} size="sm"/>
-          <WalkOrgNode initials="TM" name="ธีรพัฒน์" role="Sr. Cashier · L2"   color={WALK.sage}   size="sm"/>
-          <WalkOrgNode initials="KP" name="กัลยา"    role="Sales · L1"        color={WALK.butter} size="sm"/>
-          <WalkOrgNode initials="PV" name="ปรีชา"    role="Floor · L1"         color={WALK.ink}    size="sm"/>
-          <WalkOrgNode initials="NP" name="นิภาพร"   role="Cashier · L1"      color={WALK.coral}  size="sm"/>
-          <WalkOrgNode initials="AP" name="อัมพร"    role="Sales · L1"         color={WALK.accent} size="sm"/>
+        <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <WalkOrgNode initials="MS" name="มาริสา" role="Cashier · L1"      color={WALK.accent} size="sm"/>
+          <WalkOrgNode initials="TM" name="ธีรพัฒน์" role="Sr. Cashier"      color={WALK.sage}   size="sm"/>
+          <WalkOrgNode initials="KP" name="กัลยา"    role="Sales · L1"       color={WALK.butter} size="sm"/>
+          <WalkOrgNode initials="PV" name="ปรีชา"    role="Floor · L1"        color={WALK.ink}    size="sm"/>
+          <WalkOrgNode initials="NP" name="นิภาพร"   role="Cashier · L1"     color={WALK.coral}  size="sm"/>
+          <WalkOrgNode initials="AP" name="อัมพร"    role="Sales · L1"        color={WALK.accent} size="sm"/>
         </div>
       </div>
     </div>
   );
-
-  return (
-    <WalkFrame
-      stepIdx={1} totalSteps={4}
-      persona="Employee · มาริสา (สำรวจหัวหน้า)"
-      title="ตัวเองอยู่ตรงไหน · สายบังคับบัญชาแนวตั้ง"
-      narrative="พนักงานใหม่เปิดผังองค์กรเพื่อตอบคำถาม 'ฉันรายงานต่อใคร และใครรายงานต่อฉัน' — Humi เลือก vertical chain แทน traditional pyramid เพราะ scan ลงล่างได้บนมือถือ; node ตัวเองโตและเรืองแสง teal เพื่อ anchor สายตา"
-      mockup={mockup}
-      callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 290, y: WALK.BODY_TOP + 132, w: 200, h: 220, color: WALK.inkMuted },
-        { num: 2, x: WALK.MOCKUP_X + 270, y: WALK.BODY_TOP + 360, w: 240, h: 96 },
-        { num: 3, x: WALK.MOCKUP_X + 50,  y: WALK.BODY_TOP + 490, w: 780, h: 88, color: WALK.sage },
-        { num: 4, x: WALK.MOCKUP_X + 612, y: WALK.BODY_TOP + 14,  w: 130, h: 36, radius: 18, color: WALK.coral },
-      ]}
-      annotations={[
-        { num: 1, title: 'Manager chain แนวตั้ง · 4 ชั้น',
-          body: 'CHRO → Director → ผจก.เขต → ผจก.สาขา → หัวหน้ากะ — เรียงจากบนลงล่างใน column เดียว ทำให้ scroll นิ้วโป้งบนมือถือเข้าใจ hierarchy ได้ทันทีโดยไม่ต้อง pan ซ้าย-ขวา' },
-        { num: 2, title: 'Selected node ใหญ่ + teal glow',
-          body: 'Node ที่ focus ใช้ size "lg" + accentSoft bg + teal shadow — anchor สายตาก่อน scan ขึ้น (หัวหน้า) หรือลง (ลูกทีม); ขนาดต่างกันบอก scale ว่า "เราอยู่ตรงนี้"', color: WALK.accent },
-        { num: 3, title: 'ลูกทีมเรียงแนวนอนเท่ากัน',
-          body: 'Direct reports 6 คนใช้ size "sm" เท่ากันหมด — สื่อว่า peers อยู่ระดับเดียวกัน ไม่จัดอันดับ; กดที่ใครก็ได้เพื่อเปลี่ยน focus → reroot tree รอบคนใหม่', color: WALK.sage },
-        { num: 4, title: 'Seg toggle ผัง ↔ รายการ',
-          body: 'Pill toggle ขวาบน — ผัง = visual exploration, รายการ = scannable directory; เก็บ search bar เดียวกันทั้งสอง view เพื่อ context ไม่หาย', color: WALK.coral },
-      ]}
-    />
-  );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Frame 2 · รู้จักคนใกล้ตัว — Person panel: stats + contact + chain
-// ═══════════════════════════════════════════════════════════════════
-function OrgChartWalk2() {
-  const mockup = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {/* Profile header card */}
-      <div style={{ ...walkStyles.card(false), padding: 0, overflow: 'hidden', minHeight: 220 }}>
-        {/* Dark gradient banner */}
+// ── Person panel column ───────────────────────────────────────────────
+function PersonPanel() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ ...walkStyles.card(false), padding: 0, overflow: 'hidden' }}>
         <div style={{
           height: 60,
           background: `linear-gradient(110deg, ${WALK.ink} 0%, #1a2b42 100%)`,
@@ -177,34 +176,31 @@ function OrgChartWalk2() {
             opacity: 0.45,
           }}/>
         </div>
-        <div style={{ padding: '18px 22px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{ padding: '14px 18px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{
-              width: 62, height: 62, borderRadius: 14,
+              width: 52, height: 52, borderRadius: 14,
               background: WALK.accent, color: '#fff',
-              fontSize: 20, fontWeight: 700,
+              fontSize: 17, fontWeight: 700,
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              border: `2px solid ${WALK.surface}`,
-              flexShrink: 0,
+              border: `2px solid ${WALK.surface}`, flexShrink: 0,
             }}>MS</span>
             <div style={{ flex: 1, minWidth: 0 }}>
               <h2 style={{
                 margin: 0,
                 fontFamily: WALK.fontDisplay,
-                fontSize: 21, fontWeight: 600, letterSpacing: '-0.01em', color: WALK.ink,
+                fontSize: 17, fontWeight: 600, letterSpacing: '-0.01em', color: WALK.ink,
               }}>มาริสา สงวนศักดิ์</h2>
-              <div style={{ fontSize: 12.5, color: WALK.inkMuted, marginTop: 3, lineHeight: 1.5 }}>
-                Cashier · L1 · Central CTW ชั้น 1 · รายงานต่อ <b style={{ color: WALK.inkSoft }}>อาทิตย์ ชื่นบาน</b>
+              <div style={{ fontSize: 11.5, color: WALK.inkMuted, marginTop: 3, lineHeight: 1.5 }}>
+                Cashier · L1 · Central CTW · รายงานต่อ <b style={{ color: WALK.inkSoft }}>อาทิตย์ ชื่นบาน</b>
               </div>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-            <button style={{ ...walkStyles.btnGhost, padding: '6px 11px', fontSize: 11.5 }}>✉ ส่งข้อความ</button>
-            <button style={{ ...walkStyles.btnGhost, padding: '6px 11px', fontSize: 11.5 }}>📄 ดูโปรไฟล์เต็ม</button>
+          <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+            <button style={{ ...walkStyles.btnGhost, padding: '5px 10px', fontSize: 11 }}>✉ ข้อความ</button>
+            <button style={{ ...walkStyles.btnGhost, padding: '5px 10px', fontSize: 11 }}>📄 โปรไฟล์เต็ม</button>
           </div>
         </div>
-
-        {/* Quick stats strip */}
         <div style={{
           display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
           borderTop: `1px solid ${WALK.hairlineSoft}`,
@@ -212,241 +208,55 @@ function OrgChartWalk2() {
           {[
             { l: 'อายุงาน', v: '2 ปี 7 ด.' },
             { l: 'เกรด',    v: 'G2' },
-            { l: 'ลูกทีม',  v: '— คน' },
-            { l: 'ที่ตั้ง',  v: 'กรุงเทพฯ' },
+            { l: 'ลูกทีม',  v: '—' },
+            { l: 'ที่ตั้ง',  v: 'กทม.' },
           ].map((s, i) => (
             <div key={s.l} style={{
-              padding: '11px 14px',
+              padding: '10px 12px',
               borderLeft: i === 0 ? 0 : `1px solid ${WALK.hairlineSoft}`,
             }}>
               <div style={{ ...walkStyles.eyebrow, fontSize: 9.5 }}>{s.l}</div>
               <div style={{
                 fontFamily: WALK.fontDisplay,
-                fontSize: 15, fontWeight: 700,
-                marginTop: 3, letterSpacing: '-0.01em', color: WALK.ink,
+                fontSize: 14, fontWeight: 700,
+                marginTop: 2, letterSpacing: '-0.01em', color: WALK.ink,
               }}>{s.v}</div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Contact + Employment */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-        <div style={walkStyles.card(false)}>
-          <div style={walkStyles.eyebrow}>ช่องทางติดต่อ</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginTop: 10, fontSize: 12.5 }}>
-            <div style={{ color: WALK.inkSoft }}>✉ marisa.s@central.co.th</div>
-            <div style={{ color: WALK.inkSoft }}>📞 +66 89-•••-4521</div>
-            <div style={{ color: WALK.inkMuted, fontSize: 11.5 }}>🌐 ICT · ขณะนี้ 14:23</div>
-          </div>
-        </div>
-        <div style={walkStyles.card(false)}>
-          <div style={walkStyles.eyebrow}>การจ้างงาน</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 10, fontSize: 12.5 }}>
-            {[
-              ['ประเภท', 'พนักงานประจำ · รายเดือน'],
-              ['เริ่มงาน', '12 ก.ย. 2566'],
-              ['ผลตอบแทน', '฿18,500 / เดือน'],
-              ['Cost center', 'RTL-CTW-0412'],
-            ].map(([l, v]) => (
-              <div key={l} style={{ display: 'flex', gap: 8 }}>
-                <span style={{ color: WALK.inkMuted, width: 78, fontSize: 11.5 }}>{l}</span>
-                <span style={{ color: WALK.inkSoft, fontWeight: 500, flex: 1 }}>{v}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Skills card (preview) */}
       <div style={walkStyles.card(false)}>
-        <div style={walkStyles.eyebrow}>ทักษะ</div>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
-          {['จัดการเงินสด','POS','บริการลูกค้า','ตรวจนับสินค้า'].map(s => (
-            <span key={s} style={{
-              background: WALK.creamSoft, color: WALK.inkSoft,
-              padding: '4px 10px', borderRadius: 999,
-              fontSize: 11.5, fontWeight: 500,
-              border: `1px solid ${WALK.hairlineSoft}`,
-            }}>{s}</span>
+        <div style={walkStyles.eyebrow}>ช่องทางติดต่อ</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8, fontSize: 12 }}>
+          <div style={{ color: WALK.inkSoft }}>✉ marisa.s@central.co.th</div>
+          <div style={{ color: WALK.inkSoft }}>📞 +66 89-•••-4521</div>
+          <div style={{ color: WALK.inkMuted, fontSize: 11 }}>🌐 ICT · ขณะนี้ 14:23</div>
+        </div>
+      </div>
+
+      <div style={walkStyles.card(false)}>
+        <div style={walkStyles.eyebrow}>การจ้างงาน</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginTop: 8, fontSize: 12 }}>
+          {[
+            ['ประเภท', 'พนักงานประจำ · รายเดือน'],
+            ['เริ่มงาน', '12 ก.ย. 2566'],
+            ['ผลตอบแทน', '฿18,500 / เดือน'],
+            ['Cost center', 'RTL-CTW-0412'],
+          ].map(([l, v]) => (
+            <div key={l} style={{ display: 'flex', gap: 8 }}>
+              <span style={{ color: WALK.inkMuted, width: 70, fontSize: 11 }}>{l}</span>
+              <span style={{ color: WALK.inkSoft, fontWeight: 500, flex: 1 }}>{v}</span>
+            </div>
           ))}
         </div>
       </div>
     </div>
   );
-
-  return (
-    <WalkFrame
-      stepIdx={2} totalSteps={4}
-      persona="Employee · มาริสา (ดูตัวเอง)"
-      title="รู้จักคนใกล้ตัว · stats + contact + reporting line"
-      narrative="คลิก node แล้ว panel ขวาเปลี่ยนทันที — banner + 4 quick stats + contact + employment + skills เรียงตามลำดับ 'ใคร → อะไร → ติดต่อยังไง'; reporting line ฝังไว้ใน subtitle เพื่อเชื่อมกลับ tree ฝั่งซ้าย"
-      mockup={mockup}
-      callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 12,  y: WALK.BODY_TOP + 10,  w: 856, h: 110 },
-        { num: 2, x: WALK.MOCKUP_X + 12,  y: WALK.BODY_TOP + 158, w: 856, h: 70, color: WALK.butter },
-        { num: 3, x: WALK.MOCKUP_X + 12,  y: WALK.BODY_TOP + 244, w: 421, h: 122, color: WALK.sage },
-        { num: 4, x: WALK.MOCKUP_X + 442, y: WALK.BODY_TOP + 244, w: 426, h: 122, color: WALK.coral },
-      ]}
-      annotations={[
-        { num: 1, title: 'Hero banner ink + reporting line',
-          body: 'Banner gradient ink ตัดกับ panel cream — บอก "นี่คือคนคนนี้" ใน subtitle ฝัง "รายงานต่อ อาทิตย์" ที่กดเปลี่ยน focus กลับไปดูหัวหน้าได้ทันที (one tap traversal)' },
-        { num: 2, title: '4 quick stats grid — scannable',
-          body: 'อายุงาน · เกรด · ลูกทีม · ที่ตั้ง รวมใน 4 columns ติดกัน — display font + tabular numerals; แต่ละ stat ตอบ 1 คำถามที่ HR/Manager ถามบ่อยที่สุดเวลาเจอชื่อใหม่', color: WALK.butter },
-        { num: 3, title: 'ช่องทางติดต่อ · 3 medium',
-          body: 'อีเมล · เบอร์ · timezone ขณะนี้ — มาก่อน employment เพราะ employee persona มาดูเพื่อนเพื่อ "ติดต่อ" ไม่ใช่ "วิเคราะห์"; เบอร์ mask ตามสิทธิ์', color: WALK.sage },
-        { num: 4, title: 'การจ้างงาน · privileged data',
-          body: 'ค่าจ้าง + cost center โผล่เฉพาะตัวเองหรือ HR Admin — table 2-col (label · value) อ่านง่ายกว่า card grid; ตำแหน่ง right side สื่อว่า "ข้อมูลภายใน" แยกจาก contact public', color: WALK.coral },
-      ]}
-    />
-  );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Frame 3 · หาคนข้ามหน่วย — Search & list view
-// ═══════════════════════════════════════════════════════════════════
-function OrgChartWalk3() {
-  const results = [
-    { i: 'จท', n: 'จงรักษ์ ทานากะ',   r: 'ผู้จัดการสาขา II',           c: WALK.coral },
-    { i: 'JO', n: 'เจส โอคอน',         r: 'ผู้จัดการสาขา',              c: WALK.accent },
-    { i: 'AK', n: 'อาเมียร์ คาลิล',    r: 'ผู้จัดการสาขา',              c: WALK.butter },
-  ];
-  const listRows = [
-    { i: 'GH', n: 'เกรซ หวง',         r: 'CHRO',                        d: 'สำนักงานใหญ่',     reports: 2, c: WALK.ink,    sel: false },
-    { i: 'JM', n: 'จอร์แดน เหมย',     r: 'People Ops Director',         d: 'สำนักงานใหญ่',     reports: 2, c: WALK.sage,   sel: false },
-    { i: 'DL', n: 'ดานา หลิว',        r: 'ผู้จัดการเขต กรุงเทพฯ กลาง',  d: 'เขตทองหล่อ-สีลม',  reports: 4, c: WALK.coral,  sel: true  },
-    { i: 'จท', n: 'จงรักษ์ ทานากะ',   r: 'ผู้จัดการสาขา II',           d: 'Central CTW',      reports: 1, c: WALK.coral,  sel: false },
-    { i: 'JO', n: 'เจส โอคอน',         r: 'ผู้จัดการสาขา',              d: 'Central Silom',    reports: 0, c: WALK.accent, sel: false },
-    { i: 'AC', n: 'อาทิตย์ ชื่นบาน',   r: 'หัวหน้ากะ · L1',             d: 'Central CTW',      reports: 6, c: WALK.sage,   sel: false },
-  ];
-
-  const mockup = (
-    <div style={{ ...walkStyles.card(false), minHeight: 600, padding: '20px 22px' }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 14 }}>
-        <div>
-          <div style={walkStyles.eyebrow}>ค้นหาบุคคล</div>
-          <h3 style={walkStyles.h3Display}>รายการพนักงาน</h3>
-        </div>
-        <div style={{ flex: 1 }}/>
-        <div style={{
-          display: 'inline-flex',
-          background: WALK.creamSoft,
-          border: `1px solid ${WALK.hairline}`,
-          borderRadius: 999, padding: 3,
-        }}>
-          {['ผัง', 'รายการ'].map((t, i) => (
-            <span key={t} style={{
-              padding: '4px 14px', borderRadius: 999,
-              fontSize: 11.5, fontWeight: 600,
-              background: i === 1 ? WALK.surface : 'transparent',
-              color: i === 1 ? WALK.ink : WALK.inkMuted,
-              boxShadow: i === 1 ? '0 1px 2px rgba(14,27,44,.06)' : 'none',
-            }}>{t}</span>
-          ))}
-        </div>
-      </div>
-
-      {/* Active search field */}
-      <div style={{
-        position: 'relative', marginBottom: 6,
-        background: WALK.surface,
-        border: `1.5px solid ${WALK.accent}`,
-        borderRadius: 10,
-        padding: '9px 12px 9px 34px',
-        fontSize: 13, color: WALK.ink,
-        boxShadow: `0 0 0 4px ${WALK.accentSoft}`,
-      }}>
-        <span style={{ position: 'absolute', left: 12, top: 9, color: WALK.accent }}>🔍</span>
-        ผู้จัดการสาขา
-        <span style={{ display: 'inline-block', width: 1, height: 14, background: WALK.accent, marginLeft: 2, verticalAlign: 'middle' }}/>
-      </div>
-
-      {/* Search dropdown */}
-      <div style={{
-        background: WALK.surface,
-        border: `1px solid ${WALK.hairline}`,
-        borderRadius: 12,
-        boxShadow: '0 6px 18px rgba(14,27,44,.08)',
-        padding: 6, marginBottom: 18,
-      }}>
-        {results.map(r => (
-          <div key={r.n} style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            padding: '7px 10px', borderRadius: 8,
-            background: 'transparent',
-          }}>
-            <WalkAvatar initials={r.i} color={r.c} size={26}/>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 12.5, fontWeight: 600, color: WALK.ink }}>{r.n}</div>
-              <div style={{ fontSize: 10.5, color: WALK.inkMuted }}>{r.r}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* List view rows */}
-      <div style={{
-        background: WALK.creamSoft,
-        border: `1px solid ${WALK.hairlineSoft}`,
-        borderRadius: 12,
-        padding: 4,
-        maxHeight: 320, overflow: 'hidden',
-      }}>
-        {listRows.map(row => (
-          <div key={row.n} style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            padding: '9px 12px', borderRadius: 8,
-            background: row.sel ? WALK.accentSoft : 'transparent',
-            marginBottom: 2,
-          }}>
-            <WalkAvatar initials={row.i} color={row.c} size={28}/>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 12.5, fontWeight: 600, color: WALK.ink }}>{row.n}</div>
-              <div style={{ fontSize: 10.5, color: WALK.inkMuted }}>{row.r} · {row.d}</div>
-            </div>
-            {row.reports > 0 && (
-              <span style={{
-                fontSize: 9.5, color: WALK.inkFaint, fontWeight: 600,
-                letterSpacing: '.06em', textTransform: 'uppercase',
-              }}>{row.reports} ลูกทีม</span>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  return (
-    <WalkFrame
-      stepIdx={3} totalSteps={4}
-      persona="HR Admin · พิมพ์หาคนข้ามหน่วย"
-      title="หาคนข้ามหน่วย · search + list directory"
-      narrative="HR Admin ไม่ได้รู้จักทุกคน — search ตรงกลางตอบ name/role/branch พร้อมกัน; dropdown แสดง 6 อันดับแรกแบบ inline เพื่อเข้าโปรไฟล์ใน 1 คลิก ส่วน list view ให้ scroll ทั้ง directory ตอนยังไม่รู้ว่าจะค้นคำว่าอะไร"
-      mockup={mockup}
-      callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 22,  y: WALK.BODY_TOP + 76,  w: 836, h: 44, color: WALK.accent },
-        { num: 2, x: WALK.MOCKUP_X + 22,  y: WALK.BODY_TOP + 132, w: 836, h: 140 },
-        { num: 3, x: WALK.MOCKUP_X + 22,  y: WALK.BODY_TOP + 290, w: 836, h: 290, color: WALK.sage },
-        { num: 4, x: WALK.MOCKUP_X + 612, y: WALK.BODY_TOP + 14,  w: 130, h: 36, radius: 18, color: WALK.coral },
-      ]}
-      annotations={[
-        { num: 1, title: 'Search · 3 field ในกล่องเดียว',
-          body: 'พิมพ์ครั้งเดียวค้นได้ทั้งชื่อ ตำแหน่ง และสาขา — ไม่บังคับ user เลือก filter ก่อน; teal ring เมื่อ focus = active state อ่านง่ายไม่ต้องดู cursor', color: WALK.accent },
-        { num: 2, title: 'Dropdown 6 อันดับ + avatar',
-          body: 'Result แสดง avatar + ชื่อ + ตำแหน่ง ครบ 3 บรรทัด — ใช้ size 26 เพื่อ scan แนวตั้งเร็ว; click → setSelected + clear query เพื่อรีโฟกัส tree' },
-        { num: 3, title: 'List view · full directory',
-          body: 'เมื่อยังไม่พิมพ์ คน HR scroll ดูทั้งหมดได้ — row แสดง role · branch · จำนวนลูกทีม เป็น metadata 3 ชั้น; row ที่เลือกใช้ accentSoft bg สอดคล้องกับ tree highlight', color: WALK.sage },
-        { num: 4, title: 'Toggle ไป "รายการ" แล้ว',
-          body: 'Seg pill เลื่อนมาฝั่ง "รายการ" — บอก context ปัจจุบัน; tree ฝั่งซ้าย hide เพราะ list ครอบทั้ง column เพื่อใช้พื้นที่อ่าน 30+ คนได้ครบ', color: WALK.coral },
-      ]}
-    />
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Frame 4 · เข้าใจโครงสร้าง — Cross-org span of control + depth
-// ═══════════════════════════════════════════════════════════════════
-function OrgChartWalk4() {
+// ── Span-of-control + depth analytics ─────────────────────────────────
+function SpanAnalytics() {
   const spans = [
     { n: 'อาทิตย์ ชื่นบาน',   r: 'หัวหน้ากะ · CTW',          n_reports: 6,  c: WALK.sage,   bar: 100, flag: 'wide' },
     { n: 'ดานา หลิว',         r: 'ผจก.เขต กทม.กลาง',         n_reports: 4,  c: WALK.coral,  bar: 67,  flag: null },
@@ -455,22 +265,15 @@ function OrgChartWalk4() {
     { n: 'ซิโมน ฟอง',         r: 'ผจก.เขต กทม.ตะวันตก',      n_reports: 0,  c: WALK.accent, bar: 0,   flag: 'gap' },
   ];
 
-  const mockup = (
+  return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {/* Header */}
-      <div style={{ ...walkStyles.card(true), padding: '16px 20px' }}>
-        <div style={walkStyles.eyebrow}>วิเคราะห์โครงสร้าง · Central Retail</div>
-        <h3 style={{ ...walkStyles.h3Display, marginTop: 4 }}>Span of control · depth & coverage</h3>
-      </div>
-
-      {/* Top metrics */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
         {[
           { l: 'ความลึกสูงสุด', v: '5 ชั้น', s: 'CHRO → Cashier',     c: WALK.ink },
           { l: 'Span เฉลี่ย',    v: '2.8',    s: 'ลูกทีม/หัวหน้า',     c: WALK.accent },
           { l: 'หัวหน้าทั้งหมด',  v: '6 คน',   s: 'มี report ≥ 1',     c: WALK.sage },
           { l: 'แจ้งเตือน',      v: '2 จุด',  s: 'ตรวจสอบช่วงควบคุม',  c: WALK.coral },
-        ].map((m, i) => (
+        ].map(m => (
           <div key={m.l} style={{ ...walkStyles.card(false), padding: '12px 14px' }}>
             <div style={{ ...walkStyles.eyebrow, fontSize: 9.5, color: m.c }}>{m.l}</div>
             <div style={{
@@ -484,7 +287,6 @@ function OrgChartWalk4() {
         ))}
       </div>
 
-      {/* Span comparison bars */}
       <div style={walkStyles.card(false)}>
         <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 12 }}>
           <div>
@@ -531,29 +333,173 @@ function OrgChartWalk4() {
       </div>
     </div>
   );
+}
 
+// ── Shared page mockup ────────────────────────────────────────────────
+function orgchartPageMockup() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <WorkspaceHeader/>
+      <div style={{ display: 'grid', gap: 14, gridTemplateColumns: '1fr 1fr' }}>
+        <TreeColumn/>
+        <PersonPanel/>
+      </div>
+      <SpanAnalytics/>
+    </div>
+  );
+}
+
+// ── Regions (frame-space) ─────────────────────────────────────────────
+const SPOTX = WALK.MOCKUP_X - 4;
+const SPOTW = WALK.MOCKUP_W + 8;
+const REGIONS = {
+  header:   { y: WALK.BODY_TOP - 4,    h: 226 },   // workspace header + search + dropdown
+  tree:     { y: WALK.BODY_TOP + 236,  h: 560, x: SPOTX, w: 440 },
+  panel:    { y: WALK.BODY_TOP + 236,  h: 560, x: WALK.MOCKUP_X + 440, w: 444 },
+  analyt:   { y: WALK.BODY_TOP + 814,  h: 460 },   // KPI + span bars
+};
+const ORG_FRAME_H = 1420;
+const COMMON = {
+  totalSteps: 4,
+  persona: 'All personas',
+  frameHeight: ORG_FRAME_H,
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// Frame 1 · ตัวเองอยู่ตรงไหน — Tree
+// ═══════════════════════════════════════════════════════════════════
+function OrgChartWalk1() {
   return (
     <WalkFrame
-      stepIdx={4} totalSteps={4}
-      persona="HR Admin · วิเคราะห์โครงสร้าง"
-      title="เข้าใจโครงสร้าง · span of control + depth"
-      narrative="ข้อมูลใน ORG_PEOPLE ไม่ใช่แค่ tree วาดเล่น — aggregate ได้เป็น depth/span metrics ที่ HR ใช้ตัดสินใจ org redesign; flag teal/coral/butter เน้นจุดที่ span สูงเกินไป (คน burnout) หรือ direct ว่างเปล่า (role redundant)"
-      mockup={mockup}
+      {...COMMON}
+      stepIdx={1}
+      persona="Employee · มาริสา"
+      title="ตัวเองอยู่ตรงไหน · สายบังคับบัญชาแนวตั้ง"
+      narrative="พนักงานเปิดผังเพื่อตอบ 'ฉันรายงานต่อใคร และใครรายงานต่อฉัน' — Humi เลือก vertical chain แทน traditional pyramid เพราะ scan ลงล่างบนมือถือง่าย; node ตัวเองโต + teal glow anchor สายตา"
+      mockup={orgchartPageMockup()}
+      dim
       callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 12,  y: WALK.BODY_TOP + 78,  w: 200, h: 96, color: WALK.ink },
-        { num: 2, x: WALK.MOCKUP_X + 656, y: WALK.BODY_TOP + 78,  w: 212, h: 96, color: WALK.coral },
-        { num: 3, x: WALK.MOCKUP_X + 12,  y: WALK.BODY_TOP + 264, w: 856, h: 64, color: WALK.coral },
-        { num: 4, x: WALK.MOCKUP_X + 12,  y: WALK.BODY_TOP + 488, w: 856, h: 50, color: WALK.butter },
+        { num: 1, x: WALK.MOCKUP_X + 130, y: REGIONS.tree.y + 28, w: 200, h: 280, color: WALK.inkMuted },
+        { num: 2, x: WALK.MOCKUP_X + 110, y: REGIONS.tree.y + 318, w: 240, h: 80, color: WALK.accent },
+        { num: 3, x: WALK.MOCKUP_X + 16,  y: REGIONS.tree.y + 410, w: 420, h: 130, color: WALK.sage },
       ]}
       annotations={[
-        { num: 1, title: 'Depth = ความสูงของ org',
-          body: '5 ชั้น CHRO → Cashier บอก hierarchy ความซับซ้อน — display font + tabular numerals; subtitle อธิบาย path เพื่อให้ตัวเลขมี meaning ไม่ลอย', color: WALK.ink },
-        { num: 2, title: 'Alert tile · coral accent',
-          body: 'Tile "แจ้งเตือน 2 จุด" ใช้ coral eyebrow ดึงสายตา — บอกว่ามี anomaly ที่ต้องดู (span สูง + role ว่าง); pattern เดียวกับ alert card ใน Home', color: WALK.coral },
-        { num: 3, title: 'Wide span = coral flag',
-          body: 'อาทิตย์ span 6 คน เกิน threshold 5 → bar เป็น coral + tag "span สูง" — สื่อ "อาจ overload ต้องช่วยกระจาย"; threshold โชว์ที่ header เพื่อ transparency', color: WALK.coral },
-        { num: 4, title: 'Empty span = butter warning',
-          body: 'ซิโมนไม่มี direct report → bar 0 + tag butter "ไม่มีลูกทีม" — ใช้สี warm ไม่ใช่ red เพราะอาจเป็น role design ไม่ใช่ปัญหา; เตือนแต่ไม่ alarm', color: WALK.butter },
+        { num: 1, title: 'Vertical chain 4 ชั้น · CHRO → หัวหน้ากะ',
+          body: 'ทำไมแนวตั้งไม่ใช่ pyramid? เพราะ pyramid ใช้ horizontal space ทำให้ mobile pan ซ้ายขวา. vertical chain scan ลงล่างด้วยนิ้วโป้งได้เลย. เรียง CHRO → Director → ผจก.เขต → ผจก.สาขา → หัวหน้ากะ ใน column เดียว — sm size เท่ากันสำหรับชั้น context (ไม่ใช่จุดสนใจหลัก) เก็บ space ให้ focus node.',
+          color: WALK.inkMuted },
+        { num: 2, title: 'Selected node = lg + teal glow',
+          body: 'ทำไม focus node ใช้ขนาดต่างจาก context? เพราะ pyramid ทำให้ทุก node เท่ากัน — มองไม่ออกว่า "เราอยู่ไหน". lg + accentSoft bg + teal shadow ทำให้สายตาหยุดที่ node นี้ก่อน scan ขึ้น (หัวหน้า) หรือลง (ลูกทีม). pattern เดียวกับ "you are here" บน map.',
+          color: WALK.accent },
+        { num: 3, title: 'ลูกทีม flex แนวนอน · เท่ากันทั้ง 6',
+          body: 'ทำไม direct reports ทั้ง 6 ใช้ size เท่ากัน? เพราะ peers อยู่ระดับเดียวกันใน hierarchy — ถ้าให้ Sr. Cashier ใหญ่กว่า Cashier จะสื่อ "rank ภายในทีม" ที่ไม่ใช่หน้าที่ของ orgchart. flexWrap ให้ responsive ถ้าทีมโต. คลิกที่ไหนก็ได้ reroot tree รอบคนนั้น — "navigation by exploration".',
+          color: WALK.sage },
+      ]}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Frame 2 · รู้จักคนใกล้ตัว — Person panel
+// ═══════════════════════════════════════════════════════════════════
+function OrgChartWalk2() {
+  return (
+    <WalkFrame
+      {...COMMON}
+      stepIdx={2}
+      persona="Employee · มาริสา"
+      title="รู้จักคนใกล้ตัว · panel ขวาเปลี่ยนตามที่เลือก"
+      narrative="คลิก node แล้ว panel ขวาเปลี่ยนทันที — banner + 4 quick stats + contact + employment เรียงตามลำดับ 'ใคร → อะไร → ติดต่อยังไง'. reporting line อยู่ใน subtitle เพื่อเชื่อมกลับ tree ฝั่งซ้าย"
+      mockup={orgchartPageMockup()}
+      dim
+      callouts={[
+        { num: 1, x: REGIONS.panel.x - 4, y: REGIONS.panel.y - 4,  w: REGIONS.panel.w + 8, h: 130, color: WALK.ink },
+        { num: 2, x: REGIONS.panel.x - 4, y: REGIONS.panel.y + 130, w: REGIONS.panel.w + 8, h: 64,  color: WALK.butter },
+        { num: 3, x: REGIONS.panel.x - 4, y: REGIONS.panel.y + 208, w: REGIONS.panel.w + 8, h: 92,  color: WALK.sage },
+        { num: 4, x: REGIONS.panel.x - 4, y: REGIONS.panel.y + 312, w: REGIONS.panel.w + 8, h: 130, color: WALK.coral },
+      ]}
+      annotations={[
+        { num: 1, title: 'Hero ink + reporting line ใน subtitle',
+          body: 'ทำไม banner ink dark? เพราะตัดกับ panel ทั้งหมดที่เป็น white/cream — บอก "นี่คือคนคนนี้" หยุดสายตา. radial gradient teal/coral หลังพื้นเลียน prod-employee-detail. subtitle ฝัง "รายงานต่อ อาทิตย์" ที่ tappable — one-tap traversal กลับไป tree, ไม่ต้อง breadcrumb แยก.',
+          color: WALK.ink },
+        { num: 2, title: '4 stats grid · display font + tabular',
+          body: 'ทำไม 4 stats ไม่อยู่ใน banner เลย? เพราะ banner stays visually peaceful (รูป + ชื่อ). แยก strip ใต้ banner ด้วย border light. แต่ละ stat ตอบคำถามที่ HR/Manager ถามบ่อยที่สุดเวลาเจอชื่อใหม่ (อายุงาน · เกรด · ลูกทีม · ที่ตั้ง). display font + fontVariantNumeric: tabular-nums ทำให้ตัวเลขเรียงตรงคอลัมน์.',
+          color: WALK.butter },
+        { num: 3, title: 'Contact · 3 medium · public-tier',
+          body: 'ทำไม contact มาก่อน employment? เพราะ employee persona เปิดดูเพื่อ "ติดต่อ" — ไม่ใช่วิเคราะห์ payroll. อีเมล · เบอร์ (masked) · timezone — เบอร์ mask ตามสิทธิ์ (ไม่ใช่ HR ไม่เห็นเลขเต็ม). lower visual weight (cream card) เพราะข้อมูล operational, ไม่ใช่ sensitive.',
+          color: WALK.sage },
+        { num: 4, title: 'Employment · privileged data · 2-col label',
+          body: 'ทำไม layout label-value 2 col ไม่ใช่ card grid? เพราะข้อมูลภายใน (ค่าจ้าง · cost center) อ่านเร็วที่สุดเมื่อ alignment ตรง. ใช้ table-like 2-col ไม่ใช่ card grid (waste space). visibility ตามสิทธิ์: ตัวเองเห็นเต็ม, HR Admin เห็นเต็ม, peers เห็นแค่ "ประเภท" + "เริ่มงาน".',
+          color: WALK.coral },
+      ]}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Frame 3 · หาคนข้ามหน่วย — Search active
+// ═══════════════════════════════════════════════════════════════════
+function OrgChartWalk3() {
+  return (
+    <WalkFrame
+      {...COMMON}
+      stepIdx={3}
+      persona="HR Admin · หา manager"
+      title="หาคนข้ามหน่วย · search ทำงานทุก field"
+      narrative="HR Admin ไม่รู้จักทุกคน — search ตรงกลางตอบ name/role/branch พร้อมกัน; dropdown แสดงผลแบบ inline เพื่อเข้าโปรไฟล์ใน 1 คลิก, ไม่ต้องเลือก filter ก่อน"
+      mockup={orgchartPageMockup()}
+      dim
+      callouts={[
+        { num: 1, x: WALK.MOCKUP_X + 20, y: REGIONS.header.y + 84,  w: 832, h: 44, color: WALK.accent },
+        { num: 2, x: WALK.MOCKUP_X + 20, y: REGIONS.header.y + 134, w: 832, h: 88, color: WALK.coral },
+        { num: 3, x: WALK.MOCKUP_X + 700, y: REGIONS.header.y + 18, w: 132, h: 38, color: WALK.butter, radius: 18 },
+      ]}
+      annotations={[
+        { num: 1, title: 'Single search · 3 field พร้อมกัน',
+          body: 'ทำไมไม่ใช้ filter dropdown (ชื่อ/ตำแหน่ง/สาขา) แยก? เพราะ HR Admin มักไม่รู้ว่าจะค้น field ไหน — ถ้าเห็น "ผจก.สาขา ทองหล่อ" ก็พิมพ์ทั้งวลีเลย. single input ทำ fuzzy match กับ 3 field พร้อมกัน. teal ring + accentSoft glow เมื่อ focus = active state อ่านง่ายโดยไม่ต้องดู cursor.',
+          color: WALK.accent },
+        { num: 2, title: 'Dropdown · avatar + 2-line preview',
+          body: 'ทำไม dropdown ใส่ avatar ไม่ใช่แค่ text? เพราะ HR Admin จำคนได้จากหน้า/สีมากกว่าชื่อ. avatar 26 + ชื่อ + ตำแหน่ง ใน 3 บรรทัด scan แนวตั้งเร็ว. click → setSelected + clear query = focus กลับ tree พร้อม person panel update. ใส่แค่ top 3 ไม่ใช่ทั้ง 25 — ลด choice overload, scroll ถ้าต้องการเพิ่ม.',
+          color: WALK.coral },
+        { num: 3, title: 'Seg toggle · context preservation',
+          body: 'ทำไม pill toggle อยู่บน header ไม่ใช่ใน search bar? เพราะ "ผัง vs รายการ" เป็น view mode, ไม่ใช่ filter. pill บน header = global control ของ workspace. ใน mockup นี้ "ผัง" ยัง active เพราะ search ใน tree mode ไม่ rebuild layout — เปลี่ยน mode ค่อย hide tree, list ครอบเต็ม.',
+          color: WALK.butter },
+      ]}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Frame 4 · เข้าใจโครงสร้าง — Span + depth
+// ═══════════════════════════════════════════════════════════════════
+function OrgChartWalk4() {
+  return (
+    <WalkFrame
+      {...COMMON}
+      stepIdx={4}
+      persona="HR Admin · วิเคราะห์โครงสร้าง"
+      title="เข้าใจโครงสร้าง · span of control + depth"
+      narrative="ข้อมูล ORG_PEOPLE ไม่ใช่แค่ tree วาดเล่น — aggregate ได้เป็น depth/span metrics ที่ HR ใช้ตัดสินใจ org redesign; flag teal/coral/butter เน้นจุดที่ span สูง (burnout) หรือ direct ว่าง (role redundant)"
+      mockup={orgchartPageMockup()}
+      dim
+      callouts={[
+        { num: 1, x: SPOTX, y: REGIONS.analyt.y - 4,  w: 220, h: 90, color: WALK.ink },
+        { num: 2, x: WALK.MOCKUP_X + 654, y: REGIONS.analyt.y - 4, w: 220, h: 90, color: WALK.coral },
+        { num: 3, x: SPOTX, y: REGIONS.analyt.y + 156, w: SPOTW, h: 64, color: WALK.coral },
+        { num: 4, x: SPOTX, y: REGIONS.analyt.y + 376, w: SPOTW, h: 52, color: WALK.butter },
+      ]}
+      annotations={[
+        { num: 1, title: 'Depth · ความสูงขององค์กร · path inline',
+          body: 'ทำไม "5 ชั้น" ต้องมี subtitle "CHRO → Cashier"? เพราะตัวเลขเดี่ยวไม่มี meaning — 5 ดีหรือร้าย? subtitle path อธิบายว่าวัดอะไร. display font + tabular numerals — สังเกตว่าเลขใหญ่กว่า body text 60% เพื่อให้ scan ได้แม้ผ่านสายตา. ink tile = neutral ไม่ใช่ alarm, แค่ "ข้อมูล".',
+          color: WALK.ink },
+        { num: 2, title: 'Alert tile · coral eyebrow ดึงสายตา',
+          body: 'ทำไม "แจ้งเตือน 2 จุด" ใช้ coral eyebrow แทน red bg? เพราะถ้า bg เต็ม red ทั้ง tile จะกลบรายละเอียดอื่น. eyebrow color เป็น signal ที่ scan ได้ใน 0.3 วินาที (ตำแหน่งแถวบน), value ยังอ่านง่าย. pattern เดียวกับ alert card ใน Home — consistency ข้าม module.',
+          color: WALK.coral },
+        { num: 3, title: 'Wide span = coral flag · threshold inline',
+          body: 'ทำไม threshold "≥ 5 = ตรวจสอบ" โชว์ header? เพราะ transparency — HR ต้องเห็นเกณฑ์ที่ระบบใช้ flag (ไม่ใช่ black box). อาทิตย์ 6 คน → bar coral + tag "span สูง" สื่อ "อาจ overload, ควรช่วยกระจาย". coral ไม่ใช่ red เพราะนี่ไม่ใช่ error เป็น signal ที่ต้องคิด.',
+          color: WALK.coral },
+        { num: 4, title: 'Empty span = butter · ไม่ alarm',
+          body: 'ทำไม "ไม่มีลูกทีม" ใช้ butter ไม่ใช่ red? เพราะอาจเป็น role design (เช่น individual contributor expert) ไม่ใช่ปัญหา. butter = "ให้ check, แต่ไม่ panic" — เหมาะกับ ambiguous signals. red สงวนไว้สำหรับ broken state (เช่น report ที่หัวหน้า terminated แล้ว).',
+          color: WALK.butter },
       ]}
     />
   );

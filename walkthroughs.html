@@ -188,13 +188,29 @@ function App() {
               { name: 'PayrollWalk4', label: 'HRIS + SPD · tax formula + reconcile' },
             ]}/>
 
-      <Sect id="walk-benefit" emoji="🏥" title="Benefit · สวัสดิการ"
-            persona="Employee · Manager · HR Admin · HRIS"
+      <Sect id="walk-benefit-emp"     emoji="🏥" title="Benefit · Employee wallets"
+            persona="Employee"
             comps={[
-              { name: 'BenefitWalk1', label: 'Employee wallets · hospital/dental/glasses' },
-              { name: 'BenefitWalk2', label: 'Claim review · OCR + auto-approval' },
-              { name: 'BenefitWalk3', label: 'HRIS plan catalog · 5 plans + eligibility' },
-              { name: 'BenefitWalk4', label: 'Admin operations · assignment + rule' },
+              { name: 'BenefitWalkEmp1', label: 'Wallet shelf · hospital/dental/glasses + claim stepper', h: 440 },
+            ]}/>
+
+      <Sect id="walk-benefit-manager" emoji="🏥" title="Benefit · Manager claim review"
+            persona="Manager"
+            comps={[
+              { name: 'BenefitWalkManager1', label: 'Approval queue · OCR auto-rule + bulk approve', h: 440 },
+            ]}/>
+
+      <Sect id="walk-benefit-admin"   emoji="🏥" title="Benefit · Admin catalog + rules"
+            persona="HR Admin"
+            comps={[
+              { name: 'BenefitWalkAdmin1', label: 'Plan membership · 4 plans + pending assignment', h: 560 },
+              { name: 'BenefitWalkAdmin2', label: 'Rules engine · IF/THEN + Simulator', h: 560 },
+            ]}/>
+
+      <Sect id="walk-benefit-hris"    emoji="🏥" title="Benefit · HRIS plan catalog"
+            persona="HRIS"
+            comps={[
+              { name: 'BenefitWalkHris1', label: 'Master catalog · 5 plans + eligibility + auto-approve', h: 460 },
             ]}/>
 
       <Sect id="walk-time" emoji="⏱" title="Time · ลงเวลา + ลา"

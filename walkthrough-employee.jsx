@@ -178,10 +178,10 @@ function EmployeeWalk1() {
       narrative="พนักงาน 80% เปิดมาที่นี่เพื่อตอบ 3 คำถาม — 'ฉันเป็นใครในระบบ', 'มีอะไรค้างต้องทำ', 'เอกสารฉันอยู่ไหน' Hero ตอบทันที, cream task card ดึง 'ต้องทำ' ขึ้นบน, เอกสารอยู่ขวาเป็น quick access"
       mockup={mockup}
       callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 12,  y: WALK.BODY_TOP + 8,   w: 560, h: 122 },
-        { num: 2, x: WALK.MOCKUP_X + 12,  y: WALK.BODY_TOP + 144, w: 600, h: 36, radius: 10 },
-        { num: 3, x: WALK.MOCKUP_X + 520, y: WALK.BODY_TOP + 196, w: 350, h: 132, color: WALK.coral },
-        { num: 4, x: WALK.MOCKUP_X + 12,  y: WALK.BODY_TOP + 196, w: 500, h: 200, color: WALK.indigo },
+        { num: 1, x: WALK.MOCKUP_X - 4,   y: WALK.BODY_TOP - 4,   w: 888, h: 180 },
+        { num: 2, x: WALK.MOCKUP_X - 4,   y: WALK.BODY_TOP + 182, w: 888, h: 50,  radius: 10 },
+        { num: 3, x: WALK.MOCKUP_X + 507, y: WALK.BODY_TOP + 238, w: 377, h: 201, color: WALK.coral },
+        { num: 4, x: WALK.MOCKUP_X - 4,   y: WALK.BODY_TOP + 238, w: 505, h: 391, color: WALK.indigo },
       ]}
       annotations={[
         { num: 1, title: 'Hero = identity + status ครบจบ',
@@ -321,10 +321,10 @@ function EmployeeWalk2() {
       narrative="Manager เปิดมาที่นี่ตอนเช้าเพื่อ orient ว่า 'ใครมา/ใครหาย วันนี้' และเดือนละครั้งเพื่อดู performance — 4 stat cards ให้ pulse, ตารางให้ drill ลง individual; status + คะแนนอยู่ row เดียวเพื่อตัดสินใจ 1-on-1"
       mockup={mockup}
       callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 12,  y: WALK.BODY_TOP + 78,  w: 860, h: 84  },
-        { num: 2, x: WALK.MOCKUP_X + 230, y: WALK.BODY_TOP + 218, w: 110, h: 26, radius: 13, color: WALK.coral },
-        { num: 3, x: WALK.MOCKUP_X + 360, y: WALK.BODY_TOP + 218, w: 130, h: 26, radius: 13 },
-        { num: 4, x: WALK.MOCKUP_X + 700, y: WALK.BODY_TOP + 200, w: 170, h: 280, color: WALK.butter },
+        { num: 1, x: WALK.MOCKUP_X - 4,   y: WALK.BODY_TOP + 88,  w: 888, h: 96  },
+        { num: 2, x: WALK.MOCKUP_X + 458, y: WALK.BODY_TOP + 399, w: 126, h: 31, radius: 13, color: WALK.coral },
+        { num: 3, x: WALK.MOCKUP_X + 682, y: WALK.BODY_TOP + 454, w: 115, h: 26, radius: 10 },
+        { num: 4, x: WALK.MOCKUP_X + 789, y: WALK.BODY_TOP + 255, w:  68, h: 277, color: WALK.butter },
       ]}
       annotations={[
         { num: 1, title: '4 stat cards · pulse ที่ scan ได้',
@@ -502,10 +502,10 @@ function EmployeeWalk3() {
       narrative="HR Admin ดูแล 2,847 คน — UI ต้องเล่นกับ scale: filter rail ซ้ายให้กรองหลายมิติ (สถานะ/ประเภท/สาขา) พร้อม count ทุกตัวเลือก, active filter chip บนตารางสะท้อน state, view switcher ตาราง/การ์ด/ผัง"
       mockup={mockup}
       callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 8,   y: WALK.BODY_TOP + 78,  w: 215, h: 380 },
-        { num: 2, x: WALK.MOCKUP_X + 228, y: WALK.BODY_TOP + 84,  w: 220, h: 30, radius: 8, color: WALK.ink },
-        { num: 3, x: WALK.MOCKUP_X + 650, y: WALK.BODY_TOP + 82,  w: 220, h: 32, radius: 8, color: WALK.indigo },
-        { num: 4, x: WALK.MOCKUP_X + 228, y: WALK.BODY_TOP + 124, w: 644, h: 100, color: WALK.butter },
+        { num: 1, x: WALK.MOCKUP_X - 4,   y: WALK.BODY_TOP + 88,  w: 218, h: 390 },
+        { num: 2, x: WALK.MOCKUP_X + 220, y: WALK.BODY_TOP + 93,  w: 211, h: 31, radius: 8, color: WALK.ink },
+        { num: 3, x: WALK.MOCKUP_X + 708, y: WALK.BODY_TOP + 88,  w: 176, h: 41, radius: 8, color: WALK.indigo },
+        { num: 4, x: WALK.MOCKUP_X + 220, y: WALK.BODY_TOP + 131, w: 664, h: 349, color: WALK.butter },
       ]}
       annotations={[
         { num: 1, title: 'Filter rail · count per option',
@@ -677,10 +677,10 @@ function EmployeeWalk4() {
       narrative="Click ทะลุจาก registry มาที่ Detail hub — แสดง identity ด้านบน, workflow ที่กำลังเดิน, timeline เหตุการณ์อดีต, และ 9 action card สำหรับ next move (โอน/เลื่อน/เลิกจ้าง) ทุก action lock อัตโนมัติเมื่อเงื่อนไขไม่ตรง"
       mockup={mockup}
       callouts={[
-        { num: 1, x: WALK.MOCKUP_X + 10,  y: WALK.BODY_TOP + 110, w: 410, h: 76,  color: WALK.butter },
-        { num: 2, x: WALK.MOCKUP_X + 10,  y: WALK.BODY_TOP + 200, w: 410, h: 230 },
-        { num: 3, x: WALK.MOCKUP_X + 432, y: WALK.BODY_TOP + 8,   w: 440, h: 70,  color: WALK.indigo },
-        { num: 4, x: WALK.MOCKUP_X + 432, y: WALK.BODY_TOP + 95,  w: 440, h: 340, color: WALK.coral },
+        { num: 1, x: WALK.MOCKUP_X - 4,   y: WALK.BODY_TOP + 128, w: 420, h: 120, color: WALK.butter },
+        { num: 2, x: WALK.MOCKUP_X - 4,   y: WALK.BODY_TOP + 254, w: 420, h: 243 },
+        { num: 3, x: WALK.MOCKUP_X + 439, y: WALK.BODY_TOP + 34,  w: 428, h: 41,  color: WALK.indigo },
+        { num: 4, x: WALK.MOCKUP_X + 439, y: WALK.BODY_TOP + 79,  w: 428, h: 354, color: WALK.coral },
       ]}
       annotations={[
         { num: 1, title: 'Workflow snapshot · in-flight',
